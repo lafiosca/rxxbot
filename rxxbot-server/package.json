@@ -1,24 +1,24 @@
 {
-  "name": "rxxbot-server",
-  "version": "0.1.0",
-  "main": "dist/index.js",
-  "author": "Joe Lafiosca <joe@lafiosca.com>",
-  "license": "MIT",
-  "types": "dist/index.d.ts",
-  "scripts": {
-    "lint": "./node_modules/.bin/tslint -p tsconfig.json -c tslint.json",
-    "build": "./node_modules/.bin/tsc",
-    "start": "./node_modules/.bin/ts-node src/index.ts"
-  },
-  "dependencies": {
-    "socket.io": "^2.2.0"
-  },
-  "devDependencies": {
-    "@types/node": "^11.11.3",
-    "@types/socket.io": "^2.1.2",
-    "ts-node": "^8.0.3",
-    "tslint": "^5.13.1",
-    "tslint-config-airbnb": "^5.11.1",
-    "typescript": "^3.3.3333"
-  }
+	"name": "rxxbot-server",
+	"version": "0.1.0",
+	"main": "dist/index.js",
+	"author": "Joe Lafiosca <joe@lafiosca.com>",
+	"license": "MIT",
+	"types": "dist/index.d.ts",
+	"scripts": {
+		"lint": "./node_modules/.bin/tslint -p tsconfig.json -c tslint.json",
+		"build": "./node_modules/.bin/tsc",
+		"start": "./node_modules/.bin/ts-node src/index.ts"
+	},
+	"dependencies": {
+		"socket.io": "^2.2.0"
+	},
+	"devDependencies": {
+		"@types/node": "^11.11.3",
+		"@types/socket.io": "^2.1.2",
+		"ts-node": "^8.0.3",
+		"tslint": "^5.13.1",
+		"tslint-config-airbnb": "^5.11.1",
+		"typescript": "^3.3.3333"
+	}
 }
