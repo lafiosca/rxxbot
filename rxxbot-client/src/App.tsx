@@ -1,28 +1,47 @@
 import React, { Component } from 'react';
-import logo from './logo.svg';
+import socketIoClient from 'socket.io-client';
 import './App.css';
 
-class App extends Component {
-  render() {
-    return (
-      <div className="App">
-        <header className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <p>
-            Edit <code>src/App.tsx</code> and save to reload.
-          </p>
-          <a
-            className="App-link"
-            href="https://reactjs.org"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Learn React
-          </a>
-        </header>
-      </div>
-    );
-  }
+interface Props {}
+
+interface State {
+	socket: SocketIOClient.Socket;
+	lastHeartbeat: string;
+}
+
+const prepareSocket = (updateState: (state: Partial<State>) => void) => {
+	const socket = socketIoClient('http://localhost:23000');
+	socket.on('heartbeat', (payload: any) => {
+		console.log(`Received heartbeat: ${JSON.stringify(payload, null, 2)}`);
+		updateState({ lastHeartbeat: new Date().toISOString() });
+	});
+	return socket;
+};
+
+class App extends Component<Props, State> {
+	updateState = (state: Partial<State>) => {
+		this.setState({
+			...this.state,
+			...state,
+		});
+	}
+
+	readonly state: Readonly<State> = {
+		socket: prepareSocket(this.updateState),
+		lastHeartbeat: 'none',
+	};
+
+	render() {
+		return (
+			<div className="App">
+				<header className="App-header">
+					<p>
+						Last heartbeat: {this.state.lastHeartbeat}
+					</p>
+				</header>
+			</div>
+		);
+	}
 }
 
 export default App;

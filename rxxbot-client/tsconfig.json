@@ -11,7 +11,6 @@
     ],
     "skipLibCheck": true,
     "jsx": "preserve",
-    "declaration": true,
     "outDir": "./dist",
     "strict": true,
     "noImplicitAny": true,
