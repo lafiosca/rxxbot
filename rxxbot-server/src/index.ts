@@ -41,6 +41,10 @@ const setupTwitch = async () => {
 		console.log('Creating Twitch chat client');
 		const twitchChat = await TwitchChatClient.forTwitchClient(twitch);
 
+		twitchChat.onMessage('NOTICE', (message) => {
+			console.log(`onMessage: ${message}`);
+		});
+
 		console.log('Connecting to Twitch chat');
 		await twitchChat.connect();
 
