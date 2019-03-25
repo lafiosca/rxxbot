@@ -11,9 +11,10 @@ import {
 
 const setupTwitch = async () => {
 	console.log('Creating Twitch client');
-	const twitch = Twitch.withCredentials(
+	const twitch = await Twitch.withCredentials(
 		clientId,
 		accessToken,
+		undefined,
 		{
 			clientSecret,
 			refreshToken,
@@ -22,6 +23,9 @@ const setupTwitch = async () => {
 			},
 		},
 	);
+
+	const me = await twitch.users.getMe();
+	console.log(`Me: ${JSON.stringify(me, null, 2)}`);
 
 	const username = 'rhiow2';
 
@@ -41,10 +45,6 @@ const setupTwitch = async () => {
 		console.log('Creating Twitch chat client');
 		const twitchChat = await TwitchChatClient.forTwitchClient(twitch);
 
-		twitchChat.onMessage('NOTICE', (message) => {
-			console.log(`onMessage: ${message}`);
-		});
-
 		console.log('Connecting to Twitch chat');
 		await twitchChat.connect();
 
@@ -53,12 +53,14 @@ const setupTwitch = async () => {
 
 		console.log('Establishing privMsg listener');
 		twitchChat.onPrivmsg((channel, user, message, msg) => {
-			console.log(`${new Date().toISOString()} #${channel} ${user}: ${message}`);
-			console.log(`  emoteOffsets: ${JSON.stringify(msg.emoteOffsets)}`);
+			console.log(`${new Date().toISOString()} ${channel} ${user}: ${message}`);
+			const emotes = Array.from(msg.emoteOffsets.entries()).map(
+				([key, value]) => `${key}: ${JSON.stringify(value)}`,
+			).join(', ');
+			console.log(`  emoteOffsets: ${emotes}`);
 			console.log(`  isCheer: ${JSON.stringify(msg.isCheer)}`);
 			console.log(`  totalBits: ${JSON.stringify(msg.totalBits)}`);
 		});
-		// chatClient.removeListener(followAgeListener);
 
 		console.log(`Joining Twitch chat for '${username}'`);
 		await twitchChat.join(username);
