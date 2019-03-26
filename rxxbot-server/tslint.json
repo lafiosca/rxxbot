@@ -11,7 +11,7 @@
 		"ter-arrow-parens": [2, "always"],
 		"no-console": [false],
 		"import-name": [true, {
-			"twitch": "Twitch",
+			"twitch": "TwitchClient",
 			"twitchChatClient": "TwitchChatClient"
 		}]
 	},

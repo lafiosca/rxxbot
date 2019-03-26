@@ -1,4 +1,5 @@
-config.json
+rxxbot-server/src/config/*
+!rxxbot-server/src/config/*.example.*
 
 .vscode
 
