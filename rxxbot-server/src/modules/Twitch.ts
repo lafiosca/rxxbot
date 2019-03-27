@@ -35,10 +35,27 @@ class Twitch extends ConfigurableServerModule<TwitchConfig> {
 		this.twitch = await TwitchClient.withCredentials(
 			clientId,
 			accessToken,
-			undefined, // scopes, default to token's existing
+			[
+				// 'analytics:read:extensions',
+				// 'analytics:read:games',
+				'bits:read',
+				'channel:read:subscriptions',
+				// 'clips:edit',
+				// 'user:edit',
+				// 'user:edit:broadcast',
+				'user:read:broadcast',
+				// 'user:read:email',
+				'user_read',
+				'channel:moderate',
+				'chat:edit',
+				'chat:read',
+				'whispers:read',
+				'whispers:edit',
+			],
 			{
 				clientSecret,
 				refreshToken,
+				expiry: new Date('2019-01-01'),
 				onRefresh: (token: AccessToken) => {
 					console.log(`Received new Twitch refresh token: ${token.refreshToken}`);
 				},
