@@ -60,7 +60,7 @@ class Twitch extends ConfigurableServerModule<TwitchConfig> {
 			}
 			console.log(`Got user ${user.displayName}: ${JSON.stringify(user, null, 2)}`);
 		} catch (error) {
-			console.log(`Failed to get user ${channel}: ${error}`);
+			console.error(`Failed to get user ${channel}: ${error}`);
 			console.error(error);
 		}
 
@@ -88,7 +88,19 @@ class Twitch extends ConfigurableServerModule<TwitchConfig> {
 			console.log(`Joining Twitch chat for '${channel}'`);
 			await twitchChat.join(channel);
 		} catch (error) {
-			console.log(`Failed during IRC setup: ${error}`);
+			console.error(`Failed during IRC setup: ${error}`);
+			console.error(error);
+		}
+	}
+
+	public onEvent = async (event: any) => {
+		console.log(`Twitch::onEvent ${JSON.stringify(event)}`);
+		try {
+			console.log('Getting me from Twitch');
+			this.me = await this.twitch!.users.getMe();
+			console.log(`Logged into Twitch as: ${JSON.stringify(this.me, null, 2)}`);
+		} catch (error) {
+			console.error(`Failed to get me: ${error}`);
 			console.error(error);
 		}
 	}

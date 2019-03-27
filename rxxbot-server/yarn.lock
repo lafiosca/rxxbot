@@ -751,19 +751,19 @@ tsutils@^3.0.0, tsutils@^3.5.0:
   dependencies:
     tslib "^1.8.1"
 
-twitch-chat-client@^2.0.0-pre.6:
-  version "2.0.0-pre.6"
-  resolved "https://registry.yarnpkg.com/twitch-chat-client/-/twitch-chat-client-2.0.0-pre.6.tgz#bf9ff29c4d72246e532d5e0e6fa06b3b81f3eace"
-  integrity sha512-IVDvFfvaBArCzhVSjjYV27xSOsTRZ8jGEtZHmbDrzEp/+pO95ZY0iVOPO/h+9H1LOaiUtZ0T63qQTpiuatRvmg==
+twitch-chat-client@^2.2.0:
+  version "2.2.0"
+  resolved "https://registry.yarnpkg.com/twitch-chat-client/-/twitch-chat-client-2.2.0.tgz#a7350b6128b1a4ebd04d5d1cf69d0adf51197b24"
+  integrity sha512-mAmC1IQ5QfOjNbgknUt1TMNDN2yBHTGlRzvW1Xs0sW+TJ9wN+AUYk7kNO+Q1UBAcatx33PnPCmP6eJZHO6yQ9A==
   dependencies:
     "@d-fischer/logger" "^0.1.0"
     ircv3 "^0.14.3"
     tslib "^1.9.3"
 
-twitch@^2.0.0-pre.13:
-  version "2.0.0-pre.13"
-  resolved "https://registry.yarnpkg.com/twitch/-/twitch-2.0.0-pre.13.tgz#f5a8760bfec94c6726b27b23efb15a77646f0a3b"
-  integrity sha512-WkKBlHR84zB+aZjmF+bf2pOrYOGiTMHZusTQnVpiXf64P//JJznEQ/hGOlbs5V20B5hxmW8oUWN3MjNK4f+RZg==
+twitch@^2.1.0:
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/twitch/-/twitch-2.1.0.tgz#7c9d484507dafc232188c73cc9e780acde322200"
+  integrity sha512-Y1zNSlvsR+GKN/lw9xe1bBB3teVz3giQiHHdOJabQ0O6aipmKtpxEysG/+f34mc6X96zJt3MnHo63sNkgCiz1Q==
   dependencies:
     "@types/qs" "^6.5.1"
     fetch-ponyfill "^6.0.2"
