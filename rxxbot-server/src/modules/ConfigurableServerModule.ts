@@ -1,7 +1,7 @@
 import ServerModule from './ServerModule';
 
 abstract class ConfigurableServerModule<T> extends ServerModule {
-	protected config: T;
+	protected readonly config: T;
 
 	constructor(config: T) {
 		super();

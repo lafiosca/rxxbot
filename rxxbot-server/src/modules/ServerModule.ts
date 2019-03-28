@@ -1,3 +1,5 @@
+import { ServerEvent } from '../types';
+
 abstract class ServerModule {
 	protected api: any = null;
 
@@ -8,7 +10,7 @@ abstract class ServerModule {
 		await this.init();
 	}
 
-	public onEvent = async (event: any) => {};
+	public onEvent = async (event: ServerEvent) => {};
 }
 
 export default ServerModule;

@@ -10,10 +10,7 @@
 		"ter-no-tabs": [false],
 		"ter-arrow-parens": [2, "always"],
 		"no-console": [false],
-		"import-name": [true, {
-			"twitch": "TwitchClient",
-			"twitchChatClient": "TwitchChatClient"
-		}]
+		"import-name": [false]
 	},
 	"rulesDirectory": []
 }
