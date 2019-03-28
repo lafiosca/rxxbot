@@ -760,10 +760,10 @@ twitch-chat-client@^2.2.0:
     ircv3 "^0.14.3"
     tslib "^1.9.3"
 
-twitch@^2.1.0:
-  version "2.1.0"
-  resolved "https://registry.yarnpkg.com/twitch/-/twitch-2.1.0.tgz#7c9d484507dafc232188c73cc9e780acde322200"
-  integrity sha512-Y1zNSlvsR+GKN/lw9xe1bBB3teVz3giQiHHdOJabQ0O6aipmKtpxEysG/+f34mc6X96zJt3MnHo63sNkgCiz1Q==
+twitch@^2.1.1:
+  version "2.1.1"
+  resolved "https://registry.yarnpkg.com/twitch/-/twitch-2.1.1.tgz#c8479e072fc05ebbfcf08e11ec0fad568850dd80"
+  integrity sha512-KohFk27Hy+ZhiHfdjGLEES0VTfLaR3S+AnAyO9pCukJyB7qh7MiCJQIxJAMg2xDnfCyyzB8Jsz/tT+It9N0liA==
   dependencies:
     "@types/qs" "^6.5.1"
     fetch-ponyfill "^6.0.2"

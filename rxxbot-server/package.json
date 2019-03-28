@@ -12,7 +12,7 @@
 	},
 	"dependencies": {
 		"socket.io": "^2.2.0",
-		"twitch": "^2.1.0",
+		"twitch": "^2.1.1",
 		"twitch-chat-client": "^2.2.0"
 	},
 	"devDependencies": {
