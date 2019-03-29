@@ -6,7 +6,9 @@
 	"jsRules": {},
 	"rules": {
 		"indent": [true, "tabs"],
-		"ter-indent": [true, "tab"],
+		"ter-indent": [true, "tab", {
+			"SwitchCase": 1
+		}],
 		"ter-no-tabs": [false],
 		"ter-arrow-parens": [2, "always"],
 		"no-console": [false],

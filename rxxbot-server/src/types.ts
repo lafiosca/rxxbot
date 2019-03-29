@@ -1,24 +1,64 @@
+import StorageModule from './modules/StorageModule';
 import ServerModule from './modules/ServerModule';
 
-export interface FullModuleSpec {
+export type ModuleType = 'basic' | 'storage';
+
+export interface ModuleSpec {
+	id: string;
+	type: ModuleType;
+	module: ServerModule;
+	privileged: boolean;
+}
+
+export interface ModuleSpecMap {
+	[id: string]: ModuleSpec;
+}
+
+export interface StorageModuleSpecConfig extends Partial<ModuleSpec> {
+	type: 'storage';
+	module: StorageModule<any>;
+}
+
+export interface BasicModuleSpecConfig extends Partial<ModuleSpec> {
+	type?: 'basic';
 	module: ServerModule;
 }
 
-export type ModuleSpec = ServerModule | FullModuleSpec;
+export type ModuleSpecConfig = ServerModule
+	| StorageModuleSpecConfig
+	| BasicModuleSpecConfig;
 
 export type ServerConfig = {
-	modules: ModuleSpec[];
+	modules: ModuleSpecConfig[];
 };
 
 export enum ServerEventType {
 	InitComplete = 'initComplete',
+	Message = 'message',
 	Heartbeat = 'heartbeat',
 }
 
-export interface ServerEvent {
-	type: ServerEventType;
+export interface InitCompleteEvent {
+	type: ServerEventType.InitComplete;
 }
+
+export interface MessageEvent {
+	type: ServerEventType.Message;
+	fromModuleId: string;
+	message: string;
+}
+
+export interface HeartbeatEvent {
+	type: ServerEventType.Heartbeat;
+}
+
+export type ServerEvent = InitCompleteEvent | MessageEvent | HeartbeatEvent;
 
 export interface ServerModuleConfig {
 	[key: string]: any;
+}
+
+export interface ServerApi {
+	sendMessage: (message: string) => Promise<void>;
+	heartbeat?: () => Promise<void>;
 }

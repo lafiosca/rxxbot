@@ -2,9 +2,8 @@ import TwitchClient, { AccessToken, PrivilegedUser } from 'twitch';
 import TwitchChatClient from 'twitch-chat-client';
 
 import ConfigurableServerModule from './ConfigurableServerModule';
-import { ServerEvent, ServerEventType } from '../types';
 
-interface TwitchConfig {
+export interface TwitchConfig {
 	credentials: {
 		clientId: string;
 		clientSecret: string;
@@ -108,16 +107,14 @@ class Twitch extends ConfigurableServerModule<TwitchConfig> {
 		}
 	}
 
-	public onEvent = async (event: ServerEvent) => {
-		if (event.type === ServerEventType.Heartbeat) {
-			try {
-				console.log('Getting me from Twitch');
-				this.me = await this.twitch!.users.getMe();
-				console.log(`Logged into Twitch as: ${JSON.stringify(this.me, null, 2)}`);
-			} catch (error) {
-				console.error(`Failed to get me: ${error}`);
-				console.error(error);
-			}
+	protected onHeartbeat = async () => {
+		try {
+			console.log('Getting me from Twitch');
+			this.me = await this.twitch!.users.getMe();
+			console.log(`Logged into Twitch as: ${JSON.stringify(this.me, null, 2)}`);
+		} catch (error) {
+			console.error(`Failed to get me: ${error}`);
+			console.error(error);
 		}
 	}
 }
