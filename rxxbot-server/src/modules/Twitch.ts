@@ -55,6 +55,7 @@ class Twitch extends ConfigurableServerModule<TwitchConfig> {
 				refreshToken,
 				onRefresh: (token: AccessToken) => {
 					console.log(`Received new Twitch refresh token: ${token.refreshToken}`);
+					this.config.credentials.refreshToken = token.refreshToken;
 				},
 			},
 		);
@@ -108,6 +109,19 @@ class Twitch extends ConfigurableServerModule<TwitchConfig> {
 	}
 
 	protected onHeartbeat = async () => {
+		console.log('Fetch foo from storage');
+		const foo = await this.api!.fetch('foo');
+		let newFoo: number;
+		if (foo === null) {
+			console.log('No foo set yet, initialize it');
+			newFoo = 1;
+		} else {
+			newFoo = parseInt(foo, 10) + 1;
+			console.log(`Foo = '${foo}'`);
+		}
+		console.log(`Update foo to '${newFoo}'`);
+		await this.api!.store('foo', `${newFoo}`);
+
 		try {
 			console.log('Getting me from Twitch');
 			this.me = await this.twitch!.users.getMe();

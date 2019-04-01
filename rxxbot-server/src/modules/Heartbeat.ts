@@ -20,7 +20,6 @@ class Heartbeat extends ConfigurableServerModule<HeartbeatConfig> {
 	}
 
 	protected heartbeat = async() => {
-		console.log(`heartbeat this: ${JSON.stringify(this)}`);
 		return this.api!.heartbeat!();
 	}
 }

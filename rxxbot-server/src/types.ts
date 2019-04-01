@@ -14,6 +14,18 @@ export interface ModuleSpecMap {
 	[id: string]: ModuleSpec;
 }
 
+export interface ModuleConfig {
+	[key: string]: any;
+}
+
+export interface ModuleApi {
+	[method: string]: (...args: any[]) => any;
+}
+
+export interface ModuleApiMap {
+	[id: string]: ModuleApi;
+}
+
 export interface StorageModuleSpecConfig extends Partial<ModuleSpec> {
 	type: 'storage';
 	module: StorageModule<any>;
@@ -45,7 +57,7 @@ export interface InitCompleteEvent {
 export interface MessageEvent {
 	type: ServerEventType.Message;
 	fromModuleId: string;
-	message: string;
+	message: any;
 }
 
 export interface HeartbeatEvent {
@@ -54,11 +66,10 @@ export interface HeartbeatEvent {
 
 export type ServerEvent = InitCompleteEvent | MessageEvent | HeartbeatEvent;
 
-export interface ServerModuleConfig {
-	[key: string]: any;
-}
-
 export interface ServerApi {
 	sendMessage: (message: string) => Promise<void>;
+	store: (key: string, value: string) => Promise<void>;
+	fetch: (key: string) => Promise<string | null>;
+	remove: (key: string) => Promise<void>;
 	heartbeat?: () => Promise<void>;
 }

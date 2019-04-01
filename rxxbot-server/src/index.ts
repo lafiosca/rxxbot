@@ -4,9 +4,11 @@ import ConsoleLogger from './modules/ConsoleLogger';
 import Twitch from './modules/Twitch';
 import twitchConfig from './config/twitch.json';
 import Heartbeat from './modules/Heartbeat';
+import MemoryStore from './modules/MemoryStore';
 
 const serverConfig: ServerConfig = {
 	modules: [
+		new MemoryStore(),
 		new ConsoleLogger(),
 		new Twitch(twitchConfig),
 		{

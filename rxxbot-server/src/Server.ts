@@ -6,12 +6,16 @@ import {
 	ServerApi,
 	ModuleSpec,
 	ModuleSpecMap,
+	ModuleApiMap,
+	ModuleApi,
 } from './types';
 import ServerModule from './modules/ServerModule';
+import StorageModule from './modules/StorageModule';
 
 class Server {
 	protected readonly moduleSpecs: ModuleSpec[] = [];
 	protected readonly moduleSpecsById: ModuleSpecMap = {};
+	protected readonly moduleApiById: ModuleApiMap = {};
 
 	constructor(config: ServerConfig) {
 		this.normalizeModuleSpecs(config.modules);
@@ -24,7 +28,8 @@ class Server {
 				moduleSpec = {
 					id: config.getDefaultModuleId()
 						|| config.constructor.name,
-					type: 'basic',
+					type: config.getDefaultModuleType()
+						|| 'basic',
 					module: config,
 					privileged: false,
 				};
@@ -33,7 +38,9 @@ class Server {
 					id: config.id
 						|| config.module.getDefaultModuleId()
 						|| config.module.constructor.name,
-					type: config.type || 'basic',
+					type: config.type
+						|| config.module.getDefaultModuleType()
+						|| 'basic',
 					module: config.module,
 					privileged: config.privileged || false,
 				};
@@ -48,27 +55,64 @@ class Server {
 		});
 	}
 
-	protected moduleMap = async (mapping: (moduleSpec: ModuleSpec) => any) =>
+	protected moduleMap = <T>(mapping: (moduleSpec: ModuleSpec, index: number) => (Promise<T> | T)) =>
 		Promise.all(this.moduleSpecs.map(mapping))
 
 	protected sendEvent = async (event: ServerEvent) => {
 		await this.moduleMap((moduleSpec) => moduleSpec.module.onEvent(event));
 	}
 
-	protected sendMessage = (fromModuleId: string, message: string) =>
+	protected sendMessage = (fromModuleId: string, message: any) =>
 		this.sendEvent({
 			fromModuleId,
 			message,
 			type: ServerEventType.Message,
 		})
 
+	protected store = async (moduleId: string, key: string, value: string) => {
+		await this.moduleMap((moduleSpec) => {
+			if (moduleSpec.type === 'storage') {
+				return (moduleSpec.module as StorageModule<any>).store(moduleId, key, value);
+			}
+		});
+	}
+
+	protected fetch = async (moduleId: string, key: string) => {
+		let fetchIndex: number | null = null;
+		const results = await this.moduleMap((moduleSpec, index) => {
+			if (fetchIndex === null && moduleSpec.type === 'storage') {
+				fetchIndex = index;
+				return (moduleSpec.module as StorageModule<any>).fetch(moduleId, key);
+			}
+			return null;
+		});
+		return fetchIndex !== null
+			? results[fetchIndex]
+			: null;
+	}
+
+	protected remove = async (moduleId: string, key: string) => {
+		await this.moduleMap((moduleSpec) => {
+			if (moduleSpec.type === 'storage') {
+				return (moduleSpec.module as StorageModule<any>).remove(moduleId, key);
+			}
+		});
+	}
+
+	protected getModuleApi = <T extends ModuleApi = ModuleApi>(moduleId: string): T | null =>
+		this.moduleApiById[moduleId]
+			? this.moduleApiById[moduleId] as T
+			: null
+
 	protected heartbeat = () =>
 		this.sendEvent({ type: ServerEventType.Heartbeat })
 
 	protected buildApiForModule = (moduleSpec: ModuleSpec) => {
 		const api: ServerApi = {
-			sendMessage: (message: string) =>
-				this.sendMessage(moduleSpec.id, message),
+			sendMessage: (message: string) => this.sendMessage(moduleSpec.id, message),
+			store: (key: string, value: string) => this.store(moduleSpec.id, key, value),
+			fetch: (key: string) => this.fetch(moduleSpec.id, key),
+			remove: (key: string) => this.remove(moduleSpec.id, key),
 		};
 		if (moduleSpec.privileged) {
 			api.heartbeat = this.heartbeat;
@@ -78,10 +122,16 @@ class Server {
 
 	public listen = async () => {
 		// TODO: check for module init failures, gracefully clean up and exit
-		await this.moduleMap((moduleSpec) =>
+		const moduleApis = await this.moduleMap((moduleSpec) =>
 			moduleSpec.module.initWithApi(
 				this.buildApiForModule(moduleSpec),
 			));
+		await this.moduleMap((moduleSpec, i) => {
+			const moduleApi = moduleApis[i];
+			if (moduleApi) {
+				this.moduleApiById[moduleSpec.id] = moduleApi;
+			}
+		});
 		await this.sendEvent({ type: ServerEventType.InitComplete });
 	}
 }
