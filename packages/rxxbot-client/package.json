@@ -2,7 +2,15 @@
 	"name": "rxxbot-client",
 	"version": "0.1.0",
 	"author": "Joe Lafiosca <joe@lafiosca.com>",
+	"private": true,
 	"license": "MIT",
+	"scripts": {
+		"start": "react-scripts start",
+		"build": "react-scripts build",
+		"test": "react-scripts test",
+		"eject": "react-scripts eject",
+		"lint": "./node_modules/.bin/tslint -p tsconfig.json -c tslint.json"
+	},
 	"dependencies": {
 		"react": "^16.8.4",
 		"react-dom": "^16.8.4",
@@ -18,13 +26,6 @@
 		"tslint": "^5.13.1",
 		"tslint-config-airbnb": "^5.11.1",
 		"typescript": "3.3.3333"
-	},
-	"scripts": {
-		"start": "react-scripts start",
-		"build": "react-scripts build",
-		"test": "react-scripts test",
-		"eject": "react-scripts eject",
-		"lint": "./node_modules/.bin/tslint -p tsconfig.json -c tslint.json"
 	},
 	"browserslist": [
 		">0.2%",

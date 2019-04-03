@@ -1,0 +1,15 @@
+{
+	"name": "rxxbot",
+	"version": "0.1.0",
+	"main": "index.js",
+	"private": true,
+	"repository": "git@github.com:lafiosca/rxxbot.git",
+	"author": "Joe Lafiosca <joe@lafiosca.com>",
+	"license": "MIT",
+	"workspaces": [
+		"packages/*"
+	],
+	"devDependencies": {
+		"lerna": "^3.13.1"
+	}
+}

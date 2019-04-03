@@ -1,10 +1,9 @@
 {
 	"name": "rxxbot-server",
 	"version": "0.1.0",
-	"main": "dist/index.js",
 	"author": "Joe Lafiosca <joe@lafiosca.com>",
+	"private": true,
 	"license": "MIT",
-	"types": "dist/index.d.ts",
 	"scripts": {
 		"lint": "./node_modules/.bin/tslint -p tsconfig.json -c tslint.json",
 		"build": "./node_modules/.bin/tsc",
