@@ -98,6 +98,48 @@ class Twitch extends ConfigurableServerModule<TwitchConfig> {
 				console.log(`  emoteOffsets: ${emotes}`);
 				console.log(`  isCheer: ${JSON.stringify(msg.isCheer)}`);
 				console.log(`  totalBits: ${JSON.stringify(msg.totalBits)}`);
+				if (msg.isCheer) {
+					this.api!.sendMessage(JSON.stringify({
+						type: 'onCheer',
+						payload: {
+							channel,
+							user,
+							message,
+							totalBits: msg.totalBits,
+							emoteOffsets: Array.from(msg.emoteOffsets.entries()).reduce(
+								(eo, [key, value]) => ({
+									...eo,
+									[key]: value,
+								}),
+								{},
+							),
+						},
+					}));
+				}
+			});
+
+			twitchChat.onSub((channel, user, subInfo, msg) => {
+				this.api!.sendMessage(JSON.stringify({
+					type: 'onSub',
+					payload: {
+						channel,
+						user,
+						displayName: subInfo.displayName,
+						isPrime: subInfo.isPrime,
+						message: subInfo.message || null,
+						months: subInfo.months,
+						plan: subInfo.plan,
+						planName: subInfo.planName,
+						streak: subInfo.streak || null,
+						emoteOffsets: Array.from(msg.emoteOffsets.entries()).reduce(
+							(eo, [key, value]) => ({
+								...eo,
+								[key]: value,
+							}),
+							{},
+						),
+					},
+				}));
 			});
 
 			console.log(`Joining Twitch chat for '${channel}'`);
@@ -122,14 +164,14 @@ class Twitch extends ConfigurableServerModule<TwitchConfig> {
 		console.log(`Update foo to '${newFoo}'`);
 		await this.api!.store('foo', `${newFoo}`);
 
-		try {
-			console.log('Getting me from Twitch');
-			this.me = await this.twitch!.users.getMe();
-			console.log(`Logged into Twitch as: ${JSON.stringify(this.me, null, 2)}`);
-		} catch (error) {
-			console.error(`Failed to get me: ${error}`);
-			console.error(error);
-		}
+		// try {
+		// 	console.log('Getting me from Twitch');
+		// 	this.me = await this.twitch!.users.getMe();
+		// 	console.log(`Logged into Twitch as: ${JSON.stringify(this.me, null, 2)}`);
+		// } catch (error) {
+		// 	console.error(`Failed to get me: ${error}`);
+		// 	console.error(error);
+		// }
 	}
 }
 

@@ -11,9 +11,12 @@ interface State {
 
 const prepareSocket = (updateState: (state: Partial<State>) => void) => {
 	const socket = socketIoClient('http://localhost:23000');
-	socket.on('heartbeat', (payload: any) => {
-		console.log(`Received heartbeat: ${JSON.stringify(payload, null, 2)}`);
-		updateState({ lastHeartbeat: new Date().toISOString() });
+	socket.on('serverEvent', (payload: any) => {
+		console.log(`Received server event: ${JSON.stringify(payload, null, 2)}`);
+		if (payload.type === 'heartbeat') {
+			console.log('It\'s a heartbeat!');
+			updateState({ lastHeartbeat: new Date().toISOString() });
+		}
 	});
 	return socket;
 };
