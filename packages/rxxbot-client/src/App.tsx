@@ -1,50 +1,56 @@
-import React, { Component } from 'react';
+import React, { useState, useEffect } from 'react';
+import { BrowserRouter as Router, Route } from 'react-router-dom';
 import socketIoClient from 'socket.io-client';
 import './App.css';
 
-interface Props {}
+const Home = () => (
+	<div>Home</div>
+);
 
-interface State {
-	socket: SocketIOClient.Socket;
-	lastHeartbeat: string;
-}
-
-const prepareSocket = (updateState: (state: Partial<State>) => void) => {
-	const socket = socketIoClient('http://localhost:23000');
-	socket.on('serverEvent', (payload: any) => {
-		console.log(`Received server event: ${JSON.stringify(payload, null, 2)}`);
-		if (payload.type === 'heartbeat') {
-			console.log('It\'s a heartbeat!');
-			updateState({ lastHeartbeat: new Date().toISOString() });
-		}
-	});
-	return socket;
+const Screen = () => {
+	const [lastHeartbeat, setLastHeartbeat] = useState('none');
+	useEffect(
+		() => {
+			const socket = socketIoClient('http://localhost:23000');
+			const listener = (payload: any) => {
+				console.log(`Received server event: ${JSON.stringify(payload, null, 2)}`);
+				if (payload.type === 'heartbeat') {
+					console.log('It\'s a heartbeat!');
+					setLastHeartbeat(new Date().toISOString());
+				}
+			};
+			console.log('turn serverEvent listener on');
+			socket.on('serverEvent', listener);
+			return () => {
+				console.log('turn serverEvent listener off');
+				socket.off('serverEvent', listener);
+			};
+		},
+		[],
+	);
+	return (
+		<header className="App-header">
+			<p>
+				Last heartbeat: {lastHeartbeat}
+			</p>
+		</header>
+	);
 };
 
-class App extends Component<Props, State> {
-	updateState = (state: Partial<State>) => {
-		this.setState({
-			...this.state,
-			...state,
-		});
-	}
+const NoMatch = () => (
+	<div>Not Found</div>
+);
 
-	readonly state: Readonly<State> = {
-		socket: prepareSocket(this.updateState),
-		lastHeartbeat: 'none',
-	};
-
-	render() {
-		return (
+const App = () => {
+	return (
+		<Router>
 			<div className="App">
-				<header className="App-header">
-					<p>
-						Last heartbeat: {this.state.lastHeartbeat}
-					</p>
-				</header>
+				<Route exact path="/" component={Home} />
+				<Route path="/screen" component={Screen} />
+				<Route component={NoMatch} />
 			</div>
-		);
-	}
-}
+		</Router>
+	);
+};
 
 export default App;

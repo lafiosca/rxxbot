@@ -15,7 +15,8 @@
 		"import-name": [true, {
 			"react": "React",
 			"reactDom": "ReactDOM"
-		}]
+		}],
+		"variable-name": [false]
 	},
 	"rulesDirectory": []
 }
