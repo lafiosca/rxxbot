@@ -1,4 +1,4 @@
-import StorageModule from './StorageModule';
+import AbstractStorageModule from './AbstractStorageModule';
 
 export interface MemoryStoreConfig {}
 
@@ -8,7 +8,7 @@ interface MemoryStoreData {
 	};
 }
 
-class MemoryStore extends StorageModule<MemoryStoreConfig> {
+class MemoryStore extends AbstractStorageModule<MemoryStoreConfig> {
 	private data: MemoryStoreData = {};
 
 	constructor(config: MemoryStoreConfig = {}) {

@@ -5,10 +5,6 @@
 	],
 	"compilerOptions": {
 		"outDir": "./dist",
-		"declaration": true,
-		"baseUrl": ".",
-		"paths": {
-			"rxxbot-types": ["../rxxbot-types/src"]
-		}
+		"declaration": true
 	}
 }

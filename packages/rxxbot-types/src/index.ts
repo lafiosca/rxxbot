@@ -1,7 +1,23 @@
-import StorageModule from './modules/StorageModule';
-import ServerModule from './modules/ServerModule';
-
 export type ModuleType = 'basic' | 'storage';
+
+export interface ModuleApi {
+	[method: string]: (...args: any[]) => any;
+}
+
+export interface ServerModule {
+	getDefaultModuleId: () => string;
+	getDefaultModuleType: () => ModuleType;
+	initWithApi: (api: ServerApi) => Promise<ModuleApi | void>;
+	onEvent: (event: ServerEvent) => Promise<void>;
+}
+
+export interface BasicModule extends ServerModule {}
+
+export interface StorageModule extends ServerModule {
+	store: (moduleId: string, key: string, value: string) => Promise<void>;
+	fetch: (moduleId: string, key: string) => Promise<string | null>;
+	remove: (moduleId: string, key: string) => Promise<void>;
+}
 
 export interface ModuleSpec {
 	id: string;
@@ -18,27 +34,23 @@ export interface ModuleConfig {
 	[key: string]: any;
 }
 
-export interface ModuleApi {
-	[method: string]: (...args: any[]) => any;
-}
-
 export interface ModuleApiMap {
 	[id: string]: ModuleApi;
 }
 
 export interface StorageModuleSpecConfig extends Partial<ModuleSpec> {
 	type: 'storage';
-	module: StorageModule<any>;
+	module: StorageModule;
 }
 
-export interface BasicModuleSpecConfig extends Partial<ModuleSpec> {
+export interface ServerModuleSpecConfig extends Partial<ModuleSpec> {
 	type?: 'basic';
 	module: ServerModule;
 }
 
 export type ModuleSpecConfig = ServerModule
 	| StorageModuleSpecConfig
-	| BasicModuleSpecConfig;
+	| ServerModuleSpecConfig;
 
 export type ServerConfig = {
 	modules: ModuleSpecConfig[];

@@ -1,9 +1,9 @@
-import ConfigurableServerModule from './ConfigurableServerModule';
-import { ServerEvent } from '../types';
+import { ServerEvent } from 'rxxbot-types';
+import AbstractConfigurableModule from './AbstractConfigurableModule';
 
 export interface ConsoleLoggerConfig {}
 
-class ConsoleLogger extends ConfigurableServerModule<ConsoleLoggerConfig> {
+class ConsoleLogger extends AbstractConfigurableModule<ConsoleLoggerConfig> {
 	constructor(config: ConsoleLoggerConfig = {}) {
 		super(config);
 	}

@@ -1,5 +1,6 @@
 import {
 	ServerConfig,
+	StorageModule,
 	ModuleSpecConfig,
 	ServerEventType,
 	ServerEvent,
@@ -8,9 +9,7 @@ import {
 	ModuleSpecMap,
 	ModuleApiMap,
 	ModuleApi,
-} from './types';
-import ServerModule from './modules/ServerModule';
-import StorageModule from './modules/StorageModule';
+} from 'rxxbot-types';
 
 class Server {
 	protected readonly moduleSpecs: ModuleSpec[] = [];
@@ -24,16 +23,7 @@ class Server {
 	protected normalizeModuleSpecs = (moduleSpecConfigs: ModuleSpecConfig[]) => {
 		moduleSpecConfigs.forEach((config) => {
 			let moduleSpec: ModuleSpec;
-			if (config instanceof ServerModule) {
-				moduleSpec = {
-					id: config.getDefaultModuleId()
-						|| config.constructor.name,
-					type: config.getDefaultModuleType()
-						|| 'basic',
-					module: config,
-					privileged: false,
-				};
-			} else {
+			if ('module' in config) {
 				moduleSpec = {
 					id: config.id
 						|| config.module.getDefaultModuleId()
@@ -43,6 +33,15 @@ class Server {
 						|| 'basic',
 					module: config.module,
 					privileged: config.privileged || false,
+				};
+			} else {
+				moduleSpec = {
+					id: config.getDefaultModuleId()
+						|| config.constructor.name,
+					type: config.getDefaultModuleType()
+						|| 'basic',
+					module: config,
+					privileged: false,
 				};
 			}
 			this.moduleSpecs.push(moduleSpec);
@@ -72,7 +71,7 @@ class Server {
 	protected store = async (moduleId: string, key: string, value: string) => {
 		await this.moduleMap((moduleSpec) => {
 			if (moduleSpec.type === 'storage') {
-				return (moduleSpec.module as StorageModule<any>).store(moduleId, key, value);
+				return (moduleSpec.module as StorageModule).store(moduleId, key, value);
 			}
 		});
 	}
@@ -82,7 +81,7 @@ class Server {
 		const results = await this.moduleMap((moduleSpec, index) => {
 			if (fetchIndex === null && moduleSpec.type === 'storage') {
 				fetchIndex = index;
-				return (moduleSpec.module as StorageModule<any>).fetch(moduleId, key);
+				return (moduleSpec.module as StorageModule).fetch(moduleId, key);
 			}
 			return null;
 		});
@@ -94,7 +93,7 @@ class Server {
 	protected remove = async (moduleId: string, key: string) => {
 		await this.moduleMap((moduleSpec) => {
 			if (moduleSpec.type === 'storage') {
-				return (moduleSpec.module as StorageModule<any>).remove(moduleId, key);
+				return (moduleSpec.module as StorageModule).remove(moduleId, key);
 			}
 		});
 	}

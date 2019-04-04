@@ -1,11 +1,11 @@
+import { ServerConfig } from 'rxxbot-types';
 import Server from './Server';
-import { ServerConfig } from './types';
 import ConsoleLogger from './modules/ConsoleLogger';
 import Twitch from './modules/Twitch';
-import twitchConfig from './config/twitch.json';
 import Heartbeat from './modules/Heartbeat';
 import MemoryStore from './modules/MemoryStore';
 import SocketIo from './modules/SocketIo';
+import twitchConfig from './config/twitch.json';
 
 const serverConfig: ServerConfig = {
 	modules: [

@@ -1,7 +1,7 @@
 import TwitchClient, { AccessToken, PrivilegedUser } from 'twitch';
 import TwitchChatClient from 'twitch-chat-client';
 
-import ConfigurableServerModule from './ConfigurableServerModule';
+import AbstractConfigurableModule from './AbstractConfigurableModule';
 
 export interface TwitchConfig {
 	credentials: {
@@ -12,7 +12,7 @@ export interface TwitchConfig {
 	channel: string;
 }
 
-class Twitch extends ConfigurableServerModule<TwitchConfig> {
+class Twitch extends AbstractConfigurableModule<TwitchConfig> {
 	protected twitch: TwitchClient | null = null;
 	protected me: PrivilegedUser | null = null;
 

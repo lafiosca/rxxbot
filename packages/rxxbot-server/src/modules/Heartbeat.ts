@@ -1,10 +1,10 @@
-import ConfigurableServerModule from './ConfigurableServerModule';
+import AbstractConfigurableModule from './AbstractConfigurableModule';
 
 interface HeartbeatConfig {
 	interval?: number;
 }
 
-class Heartbeat extends ConfigurableServerModule<HeartbeatConfig> {
+class Heartbeat extends AbstractConfigurableModule<HeartbeatConfig> {
 	constructor(config: HeartbeatConfig = {}) {
 		super({
 			interval: 3600000,

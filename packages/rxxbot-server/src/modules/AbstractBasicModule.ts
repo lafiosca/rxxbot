@@ -1,12 +1,13 @@
 import {
+	BasicModule,
 	ServerEvent,
 	ServerEventType,
 	ServerApi,
 	ModuleApi,
 	ModuleType,
-} from '../types';
+} from 'rxxbot-types';
 
-abstract class ServerModule {
+abstract class AbstractBasicModule implements BasicModule {
 	protected api: ServerApi | null = null;
 
 	public getDefaultModuleId = () => '';
@@ -37,4 +38,4 @@ abstract class ServerModule {
 	protected onHeartbeat = async () => {};
 }
 
-export default ServerModule;
+export default AbstractBasicModule;

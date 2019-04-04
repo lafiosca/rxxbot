@@ -1,12 +1,12 @@
 import socketIo, { Server, Socket } from 'socket.io';
-import ConfigurableServerModule from './ConfigurableServerModule';
-import { ServerEvent } from '../types';
+import { ServerEvent } from 'rxxbot-types';
+import AbstractConfigurableModule from './AbstractConfigurableModule';
 
 export interface SocketIoConfig {
 	port?: number;
 }
 
-class SocketIo extends ConfigurableServerModule<SocketIoConfig> {
+class SocketIo extends AbstractConfigurableModule<SocketIoConfig> {
 	protected readonly io: Server;
 
 	constructor(config: SocketIoConfig = {}) {
