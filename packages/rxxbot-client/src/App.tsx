@@ -45,13 +45,13 @@ const Screen = () => {
 			<p>
 				Last heartbeat: {lastHeartbeat}
 			</p>
-			{playing && (
+			<div className={playing ? 'videoArea' : 'videoArea hide'}>
 				<ReactPlayer
 					url={`${publicUrl}/assets/macho-madness-ooh-yeah.mp4`}
-					playing
+					playing={playing}
 					onEnded={() => setPlaying(false)}
 				/>
-			)}
+			</div>
 		</header>
 	);
 };

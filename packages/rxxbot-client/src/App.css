@@ -19,15 +19,11 @@
   color: white;
 }
 
-.App-link {
-  color: #61dafb;
+.videoArea {
+  transition: opacity 0.5s;
+  opacity: 1;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.videoArea.hide {
+  opacity: 0;
 }
