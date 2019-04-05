@@ -115,6 +115,22 @@ class Twitch extends AbstractConfigurableModule<TwitchConfig> {
 							),
 						},
 					}));
+				} else {
+					this.api!.sendMessage(JSON.stringify({
+						type: 'onMessage',
+						payload: {
+							channel,
+							user,
+							message,
+							emoteOffsets: Array.from(msg.emoteOffsets.entries()).reduce(
+								(eo, [key, value]) => ({
+									...eo,
+									[key]: value,
+								}),
+								{},
+							),
+						},
+					}));
 				}
 			});
 

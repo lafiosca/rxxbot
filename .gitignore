@@ -1,5 +1,7 @@
-rxxbot-server/src/config/*
-!rxxbot-server/src/config/*.example.*
+packages/rxxbot-server/src/config/*
+!packages/rxxbot-server/src/config/*.example.*
+
+packages/rxxbot-client/public/assets/*
 
 .vscode
 

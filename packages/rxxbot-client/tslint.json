@@ -14,7 +14,8 @@
 		"no-console": [false],
 		"import-name": [true, {
 			"react": "React",
-			"reactDom": "ReactDOM"
+			"reactDom": "ReactDOM",
+			"reactPlayer": "ReactPlayer"
 		}],
 		"variable-name": [false]
 	},

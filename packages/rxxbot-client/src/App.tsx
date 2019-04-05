@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Route } from 'react-router-dom';
 import socketIoClient from 'socket.io-client';
+import ReactPlayer from 'react-player';
 import './App.css';
+
+const publicUrl = process.env.PUBLIC_URL;
 
 const Home = () => (
 	<div>Home</div>
@@ -9,6 +12,7 @@ const Home = () => (
 
 const Screen = () => {
 	const [lastHeartbeat, setLastHeartbeat] = useState('none');
+	const [playing, setPlaying] = useState(false);
 	useEffect(
 		() => {
 			const socket = socketIoClient('http://localhost:23000');
@@ -17,6 +21,14 @@ const Screen = () => {
 				if (payload.type === 'heartbeat') {
 					console.log('It\'s a heartbeat!');
 					setLastHeartbeat(new Date().toISOString());
+				} else {
+					console.log('It\'s something else!');
+					if (!playing) {
+						console.log('Start video!');
+						setPlaying(true);
+					} else {
+						console.log('Video already playing!');
+					}
 				}
 			};
 			console.log('turn serverEvent listener on');
@@ -26,13 +38,20 @@ const Screen = () => {
 				socket.off('serverEvent', listener);
 			};
 		},
-		[],
+		[playing],
 	);
 	return (
 		<header className="App-header">
 			<p>
 				Last heartbeat: {lastHeartbeat}
 			</p>
+			{playing && (
+				<ReactPlayer
+					url={`${publicUrl}/assets/macho-madness-ooh-yeah.mp4`}
+					playing
+					onEnded={() => setPlaying(false)}
+				/>
+			)}
 		</header>
 	);
 };
