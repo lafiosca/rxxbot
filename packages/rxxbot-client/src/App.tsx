@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
 import socketIoClient from 'socket.io-client';
 import ReactPlayer from 'react-player';
 import './App.css';
@@ -64,9 +64,11 @@ const App = () => {
 	return (
 		<Router>
 			<div className="App">
-				<Route exact path="/" component={Home} />
-				<Route path="/screen" component={Screen} />
-				<Route component={NoMatch} />
+				<Switch>
+					<Route exact path="/" component={Home} />
+					<Route path="/screen" component={Screen} />
+					<Route component={NoMatch} />
+				</Switch>
 			</div>
 		</Router>
 	);

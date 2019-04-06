@@ -10,10 +10,10 @@
 		"start": "./node_modules/.bin/ts-node src/index.ts"
 	},
 	"dependencies": {
+		"rxxbot-types": "^0.1.0",
 		"socket.io": "^2.2.0",
-		"twitch": "^2.1.1",
-		"twitch-chat-client": "^2.2.0",
-		"rxxbot-types": "^0.1.0"
+		"twitch": "^2.2.0",
+		"twitch-chat-client": "^2.3.1"
 	},
 	"devDependencies": {
 		"@types/node": "^11.11.3",
