@@ -4,5 +4,5 @@
 		"clientSecret": "xxxxxx",
 		"refreshToken": "xxxxxx"
 	},
-	"channel": "username"
+	"channels": ["username"]
 }

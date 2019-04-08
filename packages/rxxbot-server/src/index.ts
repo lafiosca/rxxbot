@@ -13,10 +13,10 @@ const serverConfig: ServerConfig = {
 		new SocketIo(),
 		new ConsoleLogger(),
 		new Twitch(twitchConfig),
-		{
-			module: new Heartbeat({ interval: 5000 }),
-			privileged: true,
-		},
+		// {
+		// 	module: new Heartbeat({ interval: 5000 }),
+		// 	privileged: true,
+		// },
 	],
 };
 

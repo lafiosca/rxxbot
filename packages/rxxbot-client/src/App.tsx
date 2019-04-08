@@ -17,17 +17,22 @@ const Screen = () => {
 		() => {
 			const socket = socketIoClient('http://localhost:23000');
 			const listener = (payload: any) => {
-				console.log(`Received server event: ${JSON.stringify(payload, null, 2)}`);
+				if (payload.type === 'message') {
+					payload.message = JSON.parse(payload.message);
+				}
 				if (payload.type === 'heartbeat') {
-					console.log('It\'s a heartbeat!');
+					// console.log('It\'s a heartbeat!');
 					setLastHeartbeat(new Date().toISOString());
+				} else if (payload.messageType === 'chat') {
+					// do nothing
 				} else {
-					console.log('It\'s something else!');
+					console.log(`Received server event: ${JSON.stringify(payload, null, 2)}`);
+					// console.log('It\'s something else!');
 					if (!playing) {
-						console.log('Start video!');
-						setPlaying(true);
+						// console.log('Start video!');
+						// setPlaying(true);
 					} else {
-						console.log('Video already playing!');
+						// console.log('Video already playing!');
 					}
 				}
 			};

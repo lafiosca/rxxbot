@@ -69,6 +69,7 @@ export interface InitCompleteEvent {
 export interface MessageEvent {
 	type: ServerEventType.Message;
 	fromModuleId: string;
+	messageType: string;
 	message: any;
 }
 
@@ -79,7 +80,7 @@ export interface HeartbeatEvent {
 export type ServerEvent = InitCompleteEvent | MessageEvent | HeartbeatEvent;
 
 export interface ServerApi {
-	sendMessage: (message: string) => Promise<void>;
+	sendMessage: (messageType: string, message: any) => Promise<void>;
 	store: (key: string, value: string) => Promise<void>;
 	fetch: (key: string) => Promise<string | null>;
 	remove: (key: string) => Promise<void>;

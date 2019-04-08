@@ -61,11 +61,12 @@ class Server {
 		await this.moduleMap((moduleSpec) => moduleSpec.module.onEvent(event));
 	}
 
-	protected sendMessage = (fromModuleId: string, message: any) =>
+	protected sendMessage = (fromModuleId: string, messageType: string, message: any) =>
 		this.sendEvent({
 			fromModuleId,
-			message,
+			messageType,
 			type: ServerEventType.Message,
+			message: JSON.stringify(message),
 		})
 
 	protected store = async (moduleId: string, key: string, value: string) => {
@@ -108,7 +109,8 @@ class Server {
 
 	protected buildApiForModule = (moduleSpec: ModuleSpec) => {
 		const api: ServerApi = {
-			sendMessage: (message: string) => this.sendMessage(moduleSpec.id, message),
+			sendMessage: (messageType: string, message: any) =>
+				this.sendMessage(moduleSpec.id, messageType, message),
 			store: (key: string, value: string) => this.store(moduleSpec.id, key, value),
 			fetch: (key: string) => this.fetch(moduleSpec.id, key),
 			remove: (key: string) => this.remove(moduleSpec.id, key),
