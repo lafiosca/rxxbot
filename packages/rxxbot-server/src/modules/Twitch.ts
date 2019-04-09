@@ -2,14 +2,10 @@ import TwitchClient, { AccessToken, PrivilegedUser } from 'twitch';
 import TwitchChatClient from 'twitch-chat-client';
 import TwitchPrivateMessage from 'twitch-chat-client/lib/StandardCommands/PrivateMessage';
 import {
+	ExtractMessage,
 	TwitchConfig,
 	TwitchMessageType,
 	TwitchMessageEvent,
-	TwitchMessageEventBitsBadgeUpgrade,
-	TwitchMessageEventChatClear,
-	TwitchMessageEventCommunitySub,
-	TwitchMessageEventEmoteOnly,
-	TwitchMessageEventFollowersOnly,
 } from 'rxxbot-types';
 
 import AbstractConfigurableModule from './AbstractConfigurableModule';
@@ -103,7 +99,7 @@ class Twitch extends AbstractConfigurableModule<TwitchConfig> {
 
 			// console.log('Establishing onBitsBadgeUpgrade listener');
 			twitchChat.onBitsBadgeUpgrade((channel, user, upgradeInfo, msg) => {
-				this.sendMessage<TwitchMessageEventBitsBadgeUpgrade>(
+				this.sendMessage(
 					TwitchMessageType.BitsBadgeUpgrade,
 					{
 						channel,
@@ -116,7 +112,7 @@ class Twitch extends AbstractConfigurableModule<TwitchConfig> {
 
 			// console.log('Establishing onChatClear listener');
 			twitchChat.onChatClear((channel) => {
-				this.sendMessage<TwitchMessageEventChatClear>(
+				this.sendMessage(
 					TwitchMessageType.ChatClear,
 					{ channel },
 				);
@@ -125,7 +121,7 @@ class Twitch extends AbstractConfigurableModule<TwitchConfig> {
 			// console.log('Establishing onCommunitySub listener');
 			twitchChat.onCommunitySub((channel, user, subInfo, msg) => {
 				const anon = !!subInfo.gifter;
-				this.sendMessage<TwitchMessageEventCommunitySub>(
+				this.sendMessage(
 					TwitchMessageType.CommunitySub,
 					{
 						channel,
@@ -145,7 +141,7 @@ class Twitch extends AbstractConfigurableModule<TwitchConfig> {
 
 			// console.log('Establishing onEmoteOnly listener');
 			twitchChat.onEmoteOnly((channel, enabled) => {
-				this.sendMessage<TwitchMessageEventEmoteOnly>(
+				this.sendMessage(
 					TwitchMessageType.EmoteOnly,
 					{ channel, enabled },
 				);
@@ -153,7 +149,7 @@ class Twitch extends AbstractConfigurableModule<TwitchConfig> {
 
 			// console.log('Establishing onFollowersOnly listener');
 			twitchChat.onFollowersOnly((channel, enabled, delay) => {
-				this.sendMessage<TwitchMessageEventFollowersOnly>(
+				this.sendMessage(
 					TwitchMessageType.FollowersOnly,
 					{
 						channel,
@@ -383,9 +379,9 @@ class Twitch extends AbstractConfigurableModule<TwitchConfig> {
 		}
 	}
 
-	protected sendMessage = <T extends TwitchMessageEvent>(
-		messageType: T['messageType'],
-		message: T['message'],
+	protected sendMessage = <T extends TwitchMessageEvent['messageType']>(
+		messageType: T,
+		message: ExtractMessage<TwitchMessageEvent, T>,
 	) => this.api!.sendMessage(messageType, message)
 
 	protected onHeartbeat = async () => {
