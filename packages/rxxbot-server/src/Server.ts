@@ -65,8 +65,8 @@ class Server {
 		this.sendEvent({
 			fromModuleId,
 			messageType,
+			message,
 			type: ServerEventType.Message,
-			message: JSON.stringify(message),
 		})
 
 	protected store = async (moduleId: string, key: string, value: string) => {

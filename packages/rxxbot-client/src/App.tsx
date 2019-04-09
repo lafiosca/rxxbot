@@ -1,8 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
-import socketIoClient from 'socket.io-client';
 import ReactPlayer from 'react-player';
 import './App.css';
+import {
+	addHeartbeatListener,
+	removeHeartbeatListener,
+	addMessageListener,
+	removeMessageListener,
+} from './services/socketIo';
+import { MessageEvent } from 'rxxbot-types';
 
 const publicUrl = process.env.PUBLIC_URL;
 
@@ -15,35 +21,40 @@ const Screen = () => {
 	const [playing, setPlaying] = useState(false);
 	useEffect(
 		() => {
-			const socket = socketIoClient('http://localhost:23000');
-			const listener = (payload: any) => {
-				if (payload.type === 'message') {
-					payload.message = JSON.parse(payload.message);
-				}
-				if (payload.type === 'heartbeat') {
-					// console.log('It\'s a heartbeat!');
-					setLastHeartbeat(new Date().toISOString());
-				} else if (payload.messageType === 'chat') {
-					// do nothing
-				} else {
-					console.log(`Received server event: ${JSON.stringify(payload, null, 2)}`);
-					// console.log('It\'s something else!');
+			const listener = () => {
+				setLastHeartbeat(new Date().toISOString());
+			};
+			console.log('adding heartbeat listener');
+			addHeartbeatListener(listener);
+			return () => {
+				console.log('removing heartbeat listener');
+				removeHeartbeatListener(listener);
+			};
+		},
+		[setLastHeartbeat],
+	);
+	useEffect(
+		() => {
+			const listener = (event: MessageEvent) => {
+				console.log(`Received server message event: ${JSON.stringify(event, null, 2)}`);
+				if (event.messageType === 'cheer') {
+					console.log(`Cheer from ${event.message.user}`);
 					if (!playing) {
-						// console.log('Start video!');
+						console.log('Start video!');
 						// setPlaying(true);
 					} else {
-						// console.log('Video already playing!');
+						console.log('Video already playing!');
 					}
 				}
 			};
-			console.log('turn serverEvent listener on');
-			socket.on('serverEvent', listener);
+			console.log('adding message listener');
+			addMessageListener(listener);
 			return () => {
-				console.log('turn serverEvent listener off');
-				socket.off('serverEvent', listener);
+				console.log('removing message listener');
+				removeMessageListener(listener);
 			};
 		},
-		[playing],
+		[playing, setPlaying],
 	);
 	return (
 		<header className="App-header">

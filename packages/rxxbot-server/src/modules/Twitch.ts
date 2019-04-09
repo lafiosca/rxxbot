@@ -1,17 +1,18 @@
 import TwitchClient, { AccessToken, PrivilegedUser } from 'twitch';
-import TwitchChatClient, { ChatRitualInfo } from 'twitch-chat-client';
+import TwitchChatClient from 'twitch-chat-client';
+import TwitchPrivateMessage from 'twitch-chat-client/lib/StandardCommands/PrivateMessage';
+import {
+	TwitchConfig,
+	TwitchMessageType,
+	TwitchMessageEvent,
+	TwitchMessageEventBitsBadgeUpgrade,
+	TwitchMessageEventChatClear,
+	TwitchMessageEventCommunitySub,
+	TwitchMessageEventEmoteOnly,
+	TwitchMessageEventFollowersOnly,
+} from 'rxxbot-types';
 
 import AbstractConfigurableModule from './AbstractConfigurableModule';
-import TwitchPrivateMessage from 'twitch-chat-client/lib/StandardCommands/PrivateMessage';
-
-export interface TwitchConfig {
-	credentials: {
-		clientId: string;
-		clientSecret: string;
-		refreshToken: string;
-	};
-	channels: string[];
-}
 
 const convertEmoteOffsets = (emoteOffsets: TwitchPrivateMessage['emoteOffsets']) =>
 	Array.from(emoteOffsets.entries()).reduce(
@@ -102,8 +103,8 @@ class Twitch extends AbstractConfigurableModule<TwitchConfig> {
 
 			// console.log('Establishing onBitsBadgeUpgrade listener');
 			twitchChat.onBitsBadgeUpgrade((channel, user, upgradeInfo, msg) => {
-				this.api!.sendMessage(
-					'bitsBadgeUpgrade',
+				this.sendMessage<TwitchMessageEventBitsBadgeUpgrade>(
+					TwitchMessageType.BitsBadgeUpgrade,
 					{
 						channel,
 						user,
@@ -115,14 +116,17 @@ class Twitch extends AbstractConfigurableModule<TwitchConfig> {
 
 			// console.log('Establishing onChatClear listener');
 			twitchChat.onChatClear((channel) => {
-				this.api!.sendMessage('chatClear', { channel });
+				this.sendMessage<TwitchMessageEventChatClear>(
+					TwitchMessageType.ChatClear,
+					{ channel },
+				);
 			});
 
 			// console.log('Establishing onCommunitySub listener');
 			twitchChat.onCommunitySub((channel, user, subInfo, msg) => {
 				const anon = !!subInfo.gifter;
-				this.api!.sendMessage(
-					'communitySub',
+				this.sendMessage<TwitchMessageEventCommunitySub>(
+					TwitchMessageType.CommunitySub,
 					{
 						channel,
 						user,
@@ -141,13 +145,16 @@ class Twitch extends AbstractConfigurableModule<TwitchConfig> {
 
 			// console.log('Establishing onEmoteOnly listener');
 			twitchChat.onEmoteOnly((channel, enabled) => {
-				this.api!.sendMessage('emoteOnly', { channel, enabled });
+				this.sendMessage<TwitchMessageEventEmoteOnly>(
+					TwitchMessageType.EmoteOnly,
+					{ channel, enabled },
+				);
 			});
 
 			// console.log('Establishing onFollowersOnly listener');
 			twitchChat.onFollowersOnly((channel, enabled, delay) => {
-				this.api!.sendMessage(
-					'followersOnly',
+				this.sendMessage<TwitchMessageEventFollowersOnly>(
+					TwitchMessageType.FollowersOnly,
 					{
 						channel,
 						enabled,
@@ -205,7 +212,7 @@ class Twitch extends AbstractConfigurableModule<TwitchConfig> {
 			// console.log('Establishing onPrivMsg listener (cheer/message)');
 			twitchChat.onPrivmsg((channel, user, message, msg) => {
 				this.api!.sendMessage(
-					msg.isCheer ? 'cheer' : 'chat',
+					msg.isCheer ? TwitchMessageType.Cheer : TwitchMessageType.Chat,
 					{
 						...(msg.isCheer ? { totalBits: msg.totalBits } : {}),
 						channel,
@@ -258,14 +265,13 @@ class Twitch extends AbstractConfigurableModule<TwitchConfig> {
 
 			// console.log('Establishing onRitual listener');
 			twitchChat.onRitual((channel, user, ritualInfo, msg) => {
-				const rInfo = ritualInfo as any as ChatRitualInfo; // FIXME: remove after PR is accepted
-				const newChatter = rInfo.ritualName === 'new_chatter';
+				const newChatter = ritualInfo.ritualName === 'new_chatter';
 				this.api!.sendMessage(
 					newChatter ? 'newChatter' : 'ritual',
 					{
 						channel,
 						user,
-						...(newChatter ? {} : { ritualName: rInfo.ritualName }),
+						...(newChatter ? {} : { ritualName: ritualInfo.ritualName }),
 					},
 				);
 			});
@@ -376,6 +382,11 @@ class Twitch extends AbstractConfigurableModule<TwitchConfig> {
 			throw new Error(`Failed during Twitch IRC setup: ${error}`);
 		}
 	}
+
+	protected sendMessage = <T extends TwitchMessageEvent>(
+		messageType: T['messageType'],
+		message: T['message'],
+	) => this.api!.sendMessage(messageType, message)
 
 	protected onHeartbeat = async () => {
 		// console.log('Fetch foo from storage');

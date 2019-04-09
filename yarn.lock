@@ -11778,19 +11778,19 @@ tweetnacl@^0.14.3, tweetnacl@~0.14.0:
   resolved "https://registry.yarnpkg.com/tweetnacl/-/tweetnacl-0.14.5.tgz#5ae68177f192d4456269d108afa93ff8743f4f64"
   integrity sha1-WuaBd/GS1EViadEIr6k/+HQ/T2Q=
 
-twitch-chat-client@^2.3.1:
-  version "2.3.1"
-  resolved "https://registry.yarnpkg.com/twitch-chat-client/-/twitch-chat-client-2.3.1.tgz#abd3928551a0ec10f8795234f44e3086496c3acb"
-  integrity sha512-L8IUp642lyWLcyP9/KQFM8s7r9FRd118G5vhH/RxtcSbgurFKv7J5Jwp739TIli+sMpLY9DklYpMX6vJ5F9bOg==
+twitch-chat-client@^2.3.2:
+  version "2.3.2"
+  resolved "https://registry.yarnpkg.com/twitch-chat-client/-/twitch-chat-client-2.3.2.tgz#02fcee0793391148ec4bcc16c32bcecdf1efb246"
+  integrity sha512-Kemy1MI4igCxIdgPez2IT3GbTjA8gPyp55j4EoOIeMp9ooZkZoO/ERzeMMWQNNlIsHgIBLLIqaDOa/5Nv5QbMw==
   dependencies:
     "@d-fischer/logger" "^0.1.0"
     ircv3 "^0.14.3"
     tslib "^1.9.3"
 
-twitch@^2.2.0:
-  version "2.2.0"
-  resolved "https://registry.yarnpkg.com/twitch/-/twitch-2.2.0.tgz#6d87d372bc1240832be159a9f77851bb91111c38"
-  integrity sha512-EK2wYkUzkggDlfkv59w0Ja6NfpnV8yDDw8C/Z4LcxiqTwkW769dKPJvZJbcyIfwY2Jav1TGkYpP0MQR0zDhtYQ==
+twitch@^2.2.1:
+  version "2.2.1"
+  resolved "https://registry.yarnpkg.com/twitch/-/twitch-2.2.1.tgz#1756a9506624f9ba4724c4f42381b2af8df28ee8"
+  integrity sha512-+D8s1wDde6/iVcUYtbJ4TsiykCUHFwpfGzG2/yVbmWAp2yuEQbZ3aP5o63K0crJWefT1jZAhQj8uOOtranDyOA==
   dependencies:
     "@types/qs" "^6.5.1"
     fetch-ponyfill "^6.0.2"

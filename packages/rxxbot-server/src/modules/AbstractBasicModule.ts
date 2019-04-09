@@ -24,7 +24,7 @@ abstract class AbstractBasicModule implements BasicModule {
 				await this.onInitComplete();
 				break;
 			case ServerEventType.Message:
-				await this.onMessage(event.fromModuleId, event.messageType, JSON.parse(event.message));
+				await this.onMessage(event.fromModuleId, event.messageType, event.message);
 				break;
 			case ServerEventType.Heartbeat:
 				await this.onHeartbeat();
