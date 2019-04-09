@@ -87,10 +87,6 @@ export interface ServerApi {
 	heartbeat?: () => Promise<void>;
 }
 
-export type ExtractMessage<A extends MessageEvent, T> = A extends { messageType: T }
-	? A['message']
-	: never;
-
 export interface TwitchConfig {
 	credentials: {
 		clientId: string;
@@ -331,3 +327,5 @@ export type TwitchMessageEvent = TwitchMessageEventBitsBadgeUpgrade
 	| TwitchMessageEventTimeout
 	| TwitchMessageEventUnhost
 	| TwitchMessageEventWhisper;
+
+export type ExtractTwitchMessage<T> = Extract<TwitchMessageEvent, { messageType: T }>['message'];

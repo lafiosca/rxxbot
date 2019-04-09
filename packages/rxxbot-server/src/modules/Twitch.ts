@@ -2,10 +2,9 @@ import TwitchClient, { AccessToken, PrivilegedUser } from 'twitch';
 import TwitchChatClient from 'twitch-chat-client';
 import TwitchPrivateMessage from 'twitch-chat-client/lib/StandardCommands/PrivateMessage';
 import {
-	ExtractMessage,
 	TwitchConfig,
 	TwitchMessageType,
-	TwitchMessageEvent,
+	ExtractTwitchMessage,
 } from 'rxxbot-types';
 
 import AbstractConfigurableModule from './AbstractConfigurableModule';
@@ -379,9 +378,9 @@ class Twitch extends AbstractConfigurableModule<TwitchConfig> {
 		}
 	}
 
-	protected sendMessage = <T extends TwitchMessageEvent['messageType']>(
+	protected sendMessage = <T extends TwitchMessageType>(
 		messageType: T,
-		message: ExtractMessage<TwitchMessageEvent, T>,
+		message: ExtractTwitchMessage<T>,
 	) => this.api!.sendMessage(messageType, message)
 
 	protected onHeartbeat = async () => {
