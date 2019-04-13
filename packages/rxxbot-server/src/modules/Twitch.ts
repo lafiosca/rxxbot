@@ -5,6 +5,7 @@ import {
 	TwitchConfig,
 	TwitchMessageType,
 	ExtractTwitchMessage,
+	TwitchEmoteOffsets,
 } from 'rxxbot-types';
 
 import AbstractConfigurableModule from './AbstractConfigurableModule';
@@ -15,7 +16,7 @@ const convertEmoteOffsets = (emoteOffsets: TwitchPrivateMessage['emoteOffsets'])
 			...eo,
 			[key]: value,
 		}),
-		{},
+		{} as TwitchEmoteOffsets,
 	);
 
 class Twitch extends AbstractConfigurableModule<TwitchConfig> {
@@ -150,43 +151,46 @@ class Twitch extends AbstractConfigurableModule<TwitchConfig> {
 			twitchChat.onFollowersOnly((channel, enabled, delay) => {
 				this.sendMessage(
 					TwitchMessageType.FollowersOnly,
-					{
+					enabled ? {
 						channel,
 						enabled,
-						...(enabled ? { delay } : {}),
+						delay: delay!,
+					} : {
+						channel,
+						enabled,
 					},
 				);
 			});
 
 			// console.log('Establishing onHost listener');
 			twitchChat.onHost((channel, target, viewers) => {
-				this.api!.sendMessage(
-					'host',
+				this.sendMessage(
+					TwitchMessageType.Host,
 					{
 						channel,
 						target,
-						...(typeof viewers === 'undefined' ? {} : { viewers }),
+						...(viewers === undefined ? {} : { viewers }),
 					},
 				);
 			});
 
 			// console.log('Establishing onHosted listener');
 			twitchChat.onHosted((channel, byChannel, auto, viewers) => {
-				this.api!.sendMessage(
-					'hosted',
+				this.sendMessage(
+					TwitchMessageType.Hosted,
 					{
 						channel,
 						byChannel,
 						auto,
-						...(typeof viewers === 'undefined' ? {} : { viewers }),
+						...(viewers === undefined ? {} : { viewers }),
 					},
 				);
 			});
 
 			// console.log('Establishing onHostsRemaining listener');
 			twitchChat.onHostsRemaining((channel, numberOfHosts) => {
-				this.api!.sendMessage(
-					'hostsRemaining',
+				this.sendMessage(
+					TwitchMessageType.HostsRemaining,
 					{
 						channel,
 						numberOfHosts,
@@ -196,17 +200,17 @@ class Twitch extends AbstractConfigurableModule<TwitchConfig> {
 
 			// console.log('Establishing onJoin listener');
 			twitchChat.onJoin((channel, user) => {
-				this.api!.sendMessage('join', { channel, user });
+				this.sendMessage(TwitchMessageType.Join, { channel, user });
 			});
 
 			// console.log('Establishing onPart listener');
 			twitchChat.onPart((channel, user) => {
-				this.api!.sendMessage('part', { channel, user });
+				this.sendMessage(TwitchMessageType.Part, { channel, user });
 			});
 
 			// console.log('Establishing onPrivMsg listener (cheer/message)');
 			twitchChat.onPrivmsg((channel, user, message, msg) => {
-				this.api!.sendMessage(
+				this.sendMessage(
 					msg.isCheer ? TwitchMessageType.Cheer : TwitchMessageType.Chat,
 					{
 						...(msg.isCheer ? { totalBits: msg.totalBits } : {}),
@@ -220,13 +224,13 @@ class Twitch extends AbstractConfigurableModule<TwitchConfig> {
 
 			// console.log('Establishing onR9k listener');
 			twitchChat.onR9k((channel, enabled) => {
-				this.api!.sendMessage('r9k', { channel, enabled });
+				this.sendMessage(TwitchMessageType.R9k, { channel, enabled });
 			});
 
 			// console.log('Establishing onRaid listener');
 			twitchChat.onRaid((channel, user, raidInfo, msg) => {
-				this.api!.sendMessage(
-					'raid',
+				this.sendMessage(
+					TwitchMessageType.Raid,
 					{
 						channel,
 						user,
@@ -238,8 +242,8 @@ class Twitch extends AbstractConfigurableModule<TwitchConfig> {
 
 			// console.log('Establishing onResub listener');
 			twitchChat.onResub((channel, user, subInfo, msg) => {
-				this.api!.sendMessage(
-					'resub',
+				this.sendMessage(
+					TwitchMessageType.Resub,
 					{
 						channel,
 						user,
@@ -261,8 +265,8 @@ class Twitch extends AbstractConfigurableModule<TwitchConfig> {
 			// console.log('Establishing onRitual listener');
 			twitchChat.onRitual((channel, user, ritualInfo, msg) => {
 				const newChatter = ritualInfo.ritualName === 'new_chatter';
-				this.api!.sendMessage(
-					newChatter ? 'newChatter' : 'ritual',
+				this.sendMessage(
+					newChatter ? TwitchMessageType.NewChatter : TwitchMessageType.Ritual,
 					{
 						channel,
 						user,
@@ -273,20 +277,23 @@ class Twitch extends AbstractConfigurableModule<TwitchConfig> {
 
 			// console.log('Establishing onSlow listener');
 			twitchChat.onSlow((channel, enabled, delay) => {
-				this.api!.sendMessage(
-					'slow',
-					{
+				this.sendMessage(
+					TwitchMessageType.Slow,
+					enabled ? {
 						channel,
 						enabled,
-						...(enabled ? { delay } : {}),
+						delay: delay!,
+					} : {
+						channel,
+						enabled,
 					},
 				);
 			});
 
 			// console.log('Establishing onSub listener');
 			twitchChat.onSub((channel, user, subInfo, msg) => {
-				this.api!.sendMessage(
-					'sub',
+				this.sendMessage(
+					TwitchMessageType.Sub,
 					{
 						channel,
 						user,
@@ -309,8 +316,8 @@ class Twitch extends AbstractConfigurableModule<TwitchConfig> {
 			// console.log('Establishing onSubGift listener');
 			twitchChat.onSubGift((channel, user, subInfo, msg) => {
 				const anon = !!subInfo.gifter;
-				this.api!.sendMessage(
-					'subGift',
+				this.sendMessage(
+					TwitchMessageType.SubGift,
 					{
 						channel,
 						user,
@@ -339,13 +346,13 @@ class Twitch extends AbstractConfigurableModule<TwitchConfig> {
 
 			// console.log('Establishing onSubsOnly listener');
 			twitchChat.onSubsOnly((channel, enabled) => {
-				this.api!.sendMessage('subsOnly', { channel, enabled });
+				this.sendMessage(TwitchMessageType.SubsOnly, { channel, enabled });
 			});
 
 			// console.log('Establishing onTimeout listener');
 			twitchChat.onTimeout((channel, user, reason, duration) => {
-				this.api!.sendMessage(
-					'timeout',
+				this.sendMessage(
+					TwitchMessageType.Timeout,
 					{
 						channel,
 						user,
@@ -357,13 +364,13 @@ class Twitch extends AbstractConfigurableModule<TwitchConfig> {
 
 			// console.log('Establishing onUnhost listener');
 			twitchChat.onUnhost((channel) => {
-				this.api!.sendMessage('unhost', { channel });
+				this.sendMessage(TwitchMessageType.Unhost, { channel });
 			});
 
 			// console.log('Establishing onWhisper listener');
 			twitchChat.onWhisper((user, message, msg) => {
-				this.api!.sendMessage(
-					'whisper',
+				this.sendMessage(
+					TwitchMessageType.Whisper,
 					{
 						user,
 						message,

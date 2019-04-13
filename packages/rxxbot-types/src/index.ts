@@ -123,11 +123,61 @@ export enum TwitchMessageType {
 	Whisper = 'whisper',
 }
 
+export interface TwitchEmoteOffsets {
+	[key: string]: string[];
+}
+
+export interface TwitchMessageEventMessageWithChannel {
+	channel: string;
+}
+
+export interface TwitchMessageEventMessageWithUser {
+	user: string;
+}
+
+export interface TwitchMessageEventMessageWithChannelUser
+	extends TwitchMessageEventMessageWithChannel, TwitchMessageEventMessageWithUser {}
+
+export interface TwitchMessageEventMessageWithMessage {
+	message: string;
+	emoteOffsets: TwitchEmoteOffsets;
+}
+
+export interface TwitchMessageEventMessageWithGifter {
+	gifter: string;
+	gifterDisplayName: string;
+	gifterGiftCount: number;
+}
+
+export interface TwitchMessageEventChatMessageBase
+	extends TwitchMessageEventMessageWithChannelUser, TwitchMessageEventMessageWithMessage {}
+
+export interface TwitchMessageEventCommunitySubMessageBase
+	extends TwitchMessageEventMessageWithChannelUser {
+	count: number;
+	plan: string;
+}
+
+export interface TwitchMessageEventSubResubMessageBase
+	extends TwitchMessageEventMessageWithChannelUser {
+	displayName: string;
+	isPrime: boolean;
+	months: number;
+	plan: string;
+	planName: string;
+}
+
+export interface TwitchMessageEventSubMessageBase extends TwitchMessageEventSubResubMessageBase {
+	streak?: number;
+}
+
+export interface TwitchMessageEventResubMessageBase extends TwitchMessageEventSubResubMessageBase {
+	months: number;
+}
+
 export interface TwitchMessageEventBitsBadgeUpgrade extends MessageEvent {
 	messageType: TwitchMessageType.BitsBadgeUpgrade;
-	message: {
-		channel: string;
-		user: string;
+	message: TwitchMessageEventMessageWithChannelUser & {
 		displayName: string;
 		threshold: number;
 	};
@@ -135,172 +185,213 @@ export interface TwitchMessageEventBitsBadgeUpgrade extends MessageEvent {
 
 export interface TwitchMessageEventChat extends MessageEvent {
 	messageType: TwitchMessageType.Chat;
-	message: {
-		x: number;
-	};
+	message: TwitchMessageEventChatMessageBase;
 }
 
 export interface TwitchMessageEventChatClear extends MessageEvent {
 	messageType: TwitchMessageType.ChatClear;
-	message: {
-		channel: string;
-	};
+	message: TwitchMessageEventMessageWithChannel;
 }
 
 export interface TwitchMessageEventCheer extends MessageEvent {
 	messageType: TwitchMessageType.Cheer;
-	message: {
+	message: TwitchMessageEventChatMessageBase & {
 		totalBits: number;
 	};
 }
 
-export interface TwitchMessageEventCommunitySub extends MessageEvent {
+export interface TwitchMessageEventCommunitySubAnonymous extends MessageEvent {
 	messageType: TwitchMessageType.CommunitySub;
-	message: {
-		channel: string;
-		user: string;
-		count: number;
-		plan: string;
-		gifter?: string;
-		gifterDisplayName?: string;
-		gifterGiftCount?: number;
-	};
+	message: TwitchMessageEventCommunitySubMessageBase;
 }
+
+export interface TwitchMessageEventCommunitySubNamed extends MessageEvent {
+	messageType: TwitchMessageType.CommunitySub;
+	message: TwitchMessageEventCommunitySubMessageBase & TwitchMessageEventMessageWithGifter;
+}
+
+export type TwitchMessageEventCommunitySub = TwitchMessageEventCommunitySubAnonymous
+	| TwitchMessageEventCommunitySubNamed;
 
 export interface TwitchMessageEventEmoteOnly extends MessageEvent {
 	messageType: TwitchMessageType.EmoteOnly;
-	message: {
-		channel: string;
+	message: TwitchMessageEventMessageWithChannel & {
 		enabled: boolean;
 	};
 }
 
-export interface TwitchMessageEventFollowersOnly extends MessageEvent {
+export interface TwitchMessageEventFollowersOnlyEnabled extends MessageEvent {
 	messageType: TwitchMessageType.FollowersOnly;
-	message: {
-		channel: string;
-		enabled: boolean;
-		delay?: number;
+	message: TwitchMessageEventMessageWithChannel & {
+		enabled: true;
+		delay: number;
 	};
 }
+
+export interface TwitchMessageEventFollowersOnlyDisabled extends MessageEvent {
+	messageType: TwitchMessageType.FollowersOnly;
+	message: TwitchMessageEventMessageWithChannel & {
+		enabled: false;
+	};
+}
+
+export type TwitchMessageEventFollowersOnly = TwitchMessageEventFollowersOnlyEnabled
+	| TwitchMessageEventFollowersOnlyDisabled;
 
 export interface TwitchMessageEventHost extends MessageEvent {
 	messageType: TwitchMessageType.Host;
-	message: {
-		x: number;
+	message: TwitchMessageEventMessageWithChannel & {
+		target: string;
+		viewers?: number;
 	};
 }
 
 export interface TwitchMessageEventHosted extends MessageEvent {
 	messageType: TwitchMessageType.Hosted;
-	message: {
-		x: number;
+	message: TwitchMessageEventMessageWithChannel & {
+		byChannel: string;
+		auto: boolean;
+		viewers?: number;
 	};
 }
 
 export interface TwitchMessageEventHostsRemaining extends MessageEvent {
 	messageType: TwitchMessageType.HostsRemaining;
-	message: {
-		x: number;
+	message: TwitchMessageEventMessageWithChannel & {
+		numberOfHosts: number;
 	};
 }
 
 export interface TwitchMessageEventJoin extends MessageEvent {
 	messageType: TwitchMessageType.Join;
-	message: {
-		x: number;
-	};
+	message: TwitchMessageEventMessageWithChannelUser;
 }
 
 export interface TwitchMessageEventNewChatter extends MessageEvent {
 	messageType: TwitchMessageType.NewChatter;
-	message: {
-		x: number;
-	};
+	message: TwitchMessageEventMessageWithChannelUser;
 }
 
 export interface TwitchMessageEventPart extends MessageEvent {
 	messageType: TwitchMessageType.Part;
-	message: {
-		x: number;
-	};
+	message: TwitchMessageEventMessageWithChannelUser;
 }
 
 export interface TwitchMessageEventR9k extends MessageEvent {
 	messageType: TwitchMessageType.R9k;
-	message: {
-		x: number;
+	message: TwitchMessageEventMessageWithChannel & {
+		enabled: boolean;
 	};
 }
 
 export interface TwitchMessageEventRaid extends MessageEvent {
 	messageType: TwitchMessageType.Raid;
-	message: {
-		x: number;
+	message: TwitchMessageEventMessageWithChannelUser & {
+		displayName: string;
+		viewerCount: number;
 	};
 }
 
-export interface TwitchMessageEventResub extends MessageEvent {
+export interface TwitchMessageEventResubWithoutMessage extends MessageEvent {
 	messageType: TwitchMessageType.Resub;
-	message: {
-		x: number;
-	};
+	message: TwitchMessageEventResubMessageBase;
 }
+
+export interface TwitchMessageEventResubWithMessage extends MessageEvent {
+	messageType: TwitchMessageType.Resub;
+	message: TwitchMessageEventResubMessageBase & TwitchMessageEventMessageWithMessage;
+}
+
+export type TwitchMessageEventResub = TwitchMessageEventResubWithoutMessage
+	| TwitchMessageEventResubWithMessage;
 
 export interface TwitchMessageEventRitual extends MessageEvent {
 	messageType: TwitchMessageType.Ritual;
-	message: {
-		x: number;
+	message: TwitchMessageEventMessageWithChannelUser & {
+		ritualName: string;
 	};
 }
 
-export interface TwitchMessageEventSlow extends MessageEvent {
+export interface TwitchMessageEventSlowEnabled extends MessageEvent {
 	messageType: TwitchMessageType.Slow;
-	message: {
-		x: number;
+	message: TwitchMessageEventMessageWithChannel & {
+		enabled: true;
+		delay: number;
 	};
 }
 
-export interface TwitchMessageEventSub extends MessageEvent {
+export interface TwitchMessageEventSlowDisabled extends MessageEvent {
+	messageType: TwitchMessageType.Slow;
+	message: TwitchMessageEventMessageWithChannel & {
+		enabled: false;
+	};
+}
+
+export type TwitchMessageEventSlow = TwitchMessageEventSlowEnabled | TwitchMessageEventSlowDisabled;
+
+export interface TwitchMessageEventSubWithoutMessage extends MessageEvent {
 	messageType: TwitchMessageType.Sub;
-	message: {
-		x: number;
-	};
+	message: TwitchMessageEventSubMessageBase;
 }
 
-export interface TwitchMessageEventSubGift extends MessageEvent {
-	messageType: TwitchMessageType.SubGift;
-	message: {
-		x: number;
-	};
+export interface TwitchMessageEventSubWithMessage extends MessageEvent {
+	messageType: TwitchMessageType.Sub;
+	message: TwitchMessageEventSubMessageBase & TwitchMessageEventMessageWithMessage;
 }
+
+export type TwitchMessageEventSub = TwitchMessageEventSubWithoutMessage
+	| TwitchMessageEventSubWithMessage;
+
+export interface TwitchMessageEventSubGiftAnonymousWithoutMessage extends MessageEvent {
+	messageType: TwitchMessageType.SubGift;
+	message: TwitchMessageEventSubMessageBase;
+}
+
+export interface TwitchMessageEventSubGiftAnonymousWithMessage extends MessageEvent {
+	messageType: TwitchMessageType.SubGift;
+	message: TwitchMessageEventSubMessageBase & TwitchMessageEventMessageWithMessage;
+}
+
+export interface TwitchMessageEventSubGiftNamedWithoutMessage extends MessageEvent {
+	messageType: TwitchMessageType.SubGift;
+	message: TwitchMessageEventSubMessageBase & TwitchMessageEventMessageWithGifter;
+}
+
+export interface TwitchMessageEventSubGiftNamedWithMessage extends MessageEvent {
+	messageType: TwitchMessageType.SubGift;
+	message: TwitchMessageEventSubMessageBase
+		& TwitchMessageEventMessageWithGifter
+		& TwitchMessageEventMessageWithMessage;
+}
+
+export type TwitchMessageEventSubGift = TwitchMessageEventSubGiftAnonymousWithoutMessage
+	| TwitchMessageEventSubGiftAnonymousWithMessage
+	| TwitchMessageEventSubGiftNamedWithoutMessage
+	| TwitchMessageEventSubGiftNamedWithMessage;
 
 export interface TwitchMessageEventSubsOnly extends MessageEvent {
 	messageType: TwitchMessageType.SubsOnly;
-	message: {
-		x: number;
+	message: TwitchMessageEventMessageWithChannel & {
+		enabled: boolean;
 	};
 }
 
 export interface TwitchMessageEventTimeout extends MessageEvent {
 	messageType: TwitchMessageType.Timeout;
-	message: {
-		x: number;
+	message: TwitchMessageEventMessageWithChannelUser & {
+		reason: string;
+		duration: number;
 	};
 }
 
 export interface TwitchMessageEventUnhost extends MessageEvent {
 	messageType: TwitchMessageType.Unhost;
-	message: {
-		x: number;
-	};
+	message: TwitchMessageEventMessageWithChannel;
 }
 
 export interface TwitchMessageEventWhisper extends MessageEvent {
 	messageType: TwitchMessageType.Whisper;
-	message: {
-		x: number;
-	};
+	message: TwitchMessageEventMessageWithUser & TwitchMessageEventMessageWithMessage;
 }
 
 export type TwitchMessageEvent = TwitchMessageEventBitsBadgeUpgrade
