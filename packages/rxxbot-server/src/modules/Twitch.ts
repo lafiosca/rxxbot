@@ -89,7 +89,10 @@ class Twitch extends AbstractConfigurableModule<TwitchConfig> {
 
 		try {
 			// console.log('Creating Twitch chat client');
-			const twitchChat = await TwitchChatClient.forTwitchClient(this.twitch!);
+			const twitchChat = await TwitchChatClient.forTwitchClient(
+				this.twitch!,
+				{ requestMembershipEvents: true },
+			);
 
 			// console.log('Connecting to Twitch chat');
 			await twitchChat.connect();
