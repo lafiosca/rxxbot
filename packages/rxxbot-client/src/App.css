@@ -14,6 +14,8 @@
 }
 
 .screen {
+  display: flex;
+  flex-direction: column;
   position: absolute;
   top: 0;
   left: 0;
@@ -21,32 +23,37 @@
   height: 720px;
 }
 
-.upperLeft {
+.screenRow {
+  flex: 1;
+  flex-basis: 0;
+  height: 33%;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
+}
+
+.screenRow.top div {
   justify-content: flex-start;
-  align-items: flex-start;
-  border: solid 2px red;
 }
 
-.upperRight {
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
-  align-items: flex-end;
+.screenRow.center div {
+  justify-content: center;
 }
 
-.lowerLeft {
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
+.screenCell {
+  flex: 1;
+  flex-basis: 0;
+  width: 33%;
+}
+
+.screenCell.left {
   align-items: flex-start;
 }
 
-.lowerRight {
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
+.screenCell.center {
+  align-items: center;
+}
+
+.screenCell.right {
   align-items: flex-end;
 }
 
@@ -55,11 +62,14 @@
   color: black;
 }
 
-.videoArea {
+.videoCell {
+  width: 100%;
+  height: 100%;
   transition: opacity 0.5s;
   opacity: 1;
+  background-color: black;
 }
 
-.videoArea.hide {
+.videoCell.hide {
   opacity: 0;
 }
