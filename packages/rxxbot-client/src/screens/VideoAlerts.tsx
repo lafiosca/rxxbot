@@ -51,18 +51,24 @@ const VideoAlerts = () => {
 	);
 	return (
 		<div className="screen">
-			<div className="screenRow top">
-				<div className="screenCell left"></div>
-				<div className="screenCell center"></div>
-				<div className="screenCell right"></div>
+			<div className="screenRow">
+				<div className="screenCell top left"></div>
+				<div className="screenCell top hcenter"></div>
+				<div className="screenCell top right"></div>
 			</div>
-			<div className="screenRow center">
-				<div className="screenCell left"></div>
-				<div className="screenCell center"></div>
-				<div className="screenCell right"></div>
+			<div className="screenRow">
+				<div className="screenCell vcenter left">
+					<div className="alertTextCell bottom left">
+						<div className={playing ? 'alertText' : 'alertText hide'}>
+							This is a video alert... With even more info.
+						</div>
+					</div>
+				</div>
+				<div className="screenCell vcenter hcenter"></div>
+				<div className="screenCell vcenter right"></div>
 			</div>
-			<div className="screenRow bottom">
-				<div className="screenCell left">
+			<div className="screenRow">
+				<div className="screenCell bottom left">
 					<div className={playing ? 'videoCell' : 'videoCell hide'}>
 						<ReactPlayer
 							width="100%"
@@ -74,8 +80,8 @@ const VideoAlerts = () => {
 						/>
 					</div>
 				</div>
-				<div className="screenCell center"></div>
-				<div className="screenCell right"></div>
+				<div className="screenCell bottom hcenter"></div>
+				<div className="screenCell bottom right"></div>
 			</div>
 		</div>
 	);

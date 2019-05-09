@@ -31,45 +31,71 @@
   flex-direction: row;
 }
 
-.screenRow.top div {
-  justify-content: flex-start;
-}
-
-.screenRow.center div {
-  justify-content: center;
-}
-
 .screenCell {
+  display: flex;
   flex: 1;
   flex-basis: 0;
+  flex-direction: row;
   width: 33%;
 }
 
-.screenCell.left {
+.top {
   align-items: flex-start;
 }
 
-.screenCell.center {
+.vcenter {
   align-items: center;
 }
 
-.screenCell.right {
+.bottom {
   align-items: flex-end;
 }
 
+.left {
+  justify-content: flex-start;
+}
+
+.hcenter {
+  justify-content: center;
+}
+
+.right {
+  justify-content: flex-end;
+}
+
+.alertTextCell {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: row;
+}
+
 .alertText {
-  font-size: 14pt;
-  color: black;
+  width: 100%;
+  font-family: 'c64';
+  font-size: 16px;
+  color: green;
+  background-color: black;
+  padding: 16px;
+  transition: opacity 0.5s;
+  opacity: 1;
 }
 
 .videoCell {
   width: 100%;
   height: 100%;
+  padding: 8px;
+  box-sizing: border-box;
+  background-color: black;
   transition: opacity 0.5s;
   opacity: 1;
-  background-color: black;
 }
 
-.videoCell.hide {
+.hide {
   opacity: 0;
+}
+
+@font-face {
+  font-family: 'c64';
+  src: local('C64 Pro Mono'), url(./fonts/c64.ttf) format('truetype');
 }
