@@ -1,12 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
-import { MessageEvent } from 'rxxbot-types';
 import VideoAlerts from './screens/VideoAlerts';
 import './App.css';
-import {
-	addMessageListener,
-	removeMessageListener,
-} from './services/socketIo';
 
 const Home = () => (
 	<div>Home</div>

@@ -87,7 +87,7 @@ export interface ServerApi {
 	heartbeat?: () => Promise<void>;
 }
 
-export interface TwitchConfig {
+export interface TwitchConfig extends ModuleConfig {
 	credentials: {
 		clientId: string;
 		clientSecret: string;
@@ -420,3 +420,7 @@ export type TwitchMessageEvent = TwitchMessageEventBitsBadgeUpgrade
 	| TwitchMessageEventWhisper;
 
 export type ExtractTwitchMessage<T> = Extract<TwitchMessageEvent, { messageType: T }>['message'];
+
+export interface TwitchAlertsConfig extends ModuleConfig {
+	twitchModuleId: string;
+}

@@ -2,6 +2,7 @@ import { ServerConfig } from 'rxxbot-types';
 import Server from './Server';
 import ConsoleLogger from './modules/ConsoleLogger';
 import Twitch from './modules/Twitch';
+import TwitchAlerts from './modules/TwitchAlerts';
 import Heartbeat from './modules/Heartbeat';
 import MemoryStore from './modules/MemoryStore';
 import SocketIo from './modules/SocketIo';
@@ -13,6 +14,7 @@ const serverConfig: ServerConfig = {
 		new SocketIo(),
 		new ConsoleLogger(),
 		new Twitch(twitchConfig),
+		new TwitchAlerts(),
 		{
 			module: new Heartbeat({ interval: 30000 }),
 			privileged: true,

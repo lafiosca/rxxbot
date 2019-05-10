@@ -392,30 +392,6 @@ class Twitch extends AbstractConfigurableModule<TwitchConfig> {
 		messageType: T,
 		message: ExtractTwitchMessage<T>,
 	) => this.api!.sendMessage(messageType, message)
-
-	protected onHeartbeat = async () => {
-		// console.log('Fetch foo from storage');
-		// const foo = await this.api!.fetch('foo');
-		// let newFoo: number;
-		// if (foo === null) {
-		// 	console.log('No foo set yet, initialize it');
-		// 	newFoo = 1;
-		// } else {
-		// 	newFoo = parseInt(foo, 10) + 1;
-		// 	console.log(`Foo = '${foo}'`);
-		// }
-		// console.log(`Update foo to '${newFoo}'`);
-		// await this.api!.store('foo', `${newFoo}`);
-
-		// try {
-		// 	console.log('Getting me from Twitch');
-		// 	this.me = await this.twitch!.users.getMe();
-		// 	console.log(`Logged into Twitch as: ${JSON.stringify(this.me, null, 2)}`);
-		// } catch (error) {
-		// 	console.error(`Failed to get me: ${error}`);
-		// 	console.error(error);
-		// }
-	}
 }
 
 export default Twitch;
