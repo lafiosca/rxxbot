@@ -74,11 +74,18 @@
   width: 100%;
   font-family: 'c64';
   font-size: 16px;
+  line-height: 18px;
   color: green;
+  text-align: left;
   background-color: black;
   padding: 16px;
   transition: opacity 0.5s;
   opacity: 1;
+}
+
+.alertText .highlight {
+  display: inline;
+  color: lightgreen;
 }
 
 .videoCell {

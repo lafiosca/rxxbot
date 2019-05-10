@@ -16,7 +16,8 @@ const videos = [
 ];
 
 const VideoAlerts = () => {
-	const [currentVideo, setCurrentVideo] = useState<string | null>(null);
+	const [alertVideo, setAlertVideo] = useState<string | null>(null);
+	const [alertMessage, setAlertMessage] = useState<JSX.Element | null>(null);
 	const [playing, setPlaying] = useState(false);
 	useEffect(
 		() => {
@@ -30,8 +31,14 @@ const VideoAlerts = () => {
 					} else {
 						const video = lodash.sample(videos)!;
 						console.log(`Start video ${video}`);
-						setCurrentVideo(video);
+						setAlertVideo(video);
 						setPlaying(true);
+						setAlertMessage((
+							<React.Fragment>
+								Incoming chat message from <div className="highlight">{event.message.user}</div> in
+								channel <div className="highlight">{event.message.channel}</div>...
+							</React.Fragment>
+						));
 					}
 				}
 			};
@@ -43,10 +50,12 @@ const VideoAlerts = () => {
 			};
 		},
 		[
-			currentVideo,
-			setCurrentVideo,
+			alertVideo,
+			setAlertVideo,
 			playing,
 			setPlaying,
+			alertMessage,
+			setAlertMessage,
 		],
 	);
 	return (
@@ -60,7 +69,7 @@ const VideoAlerts = () => {
 				<div className="screenCell vcenter left">
 					<div className="alertTextCell bottom left">
 						<div className={playing ? 'alertText' : 'alertText hide'}>
-							This is a video alert... With even more info.
+							{alertMessage}
 						</div>
 					</div>
 				</div>
@@ -73,7 +82,7 @@ const VideoAlerts = () => {
 						<ReactPlayer
 							width="100%"
 							height="100%"
-							url={`${assetsUrl}/${currentVideo}`}
+							url={`${assetsUrl}/${alertVideo}`}
 							playing={playing}
 							onEnded={() => setPlaying(false)}
 							volume={0.1}
