@@ -97,30 +97,30 @@ export interface TwitchConfig extends ModuleConfig {
 }
 
 export enum TwitchMessageType {
-	BitsBadgeUpgrade = 'bitsBadgeUpgrade',
-	Chat = 'chat',
-	ChatClear = 'chatClear',
-	Cheer = 'cheer',
-	CommunitySub = 'communitySub',
-	EmoteOnly = 'emoteOnly',
-	FollowersOnly = 'followersOnly',
-	Host = 'host',
-	Hosted = 'hosted',
-	HostsRemaining = 'hostsRemaining',
-	Join = 'join',
-	NewChatter = 'newChatter',
-	Part = 'part',
-	R9k = 'r9k',
-	Raid = 'raid',
-	Resub = 'resub',
-	Ritual = 'ritual',
-	Slow = 'slow',
-	Sub = 'sub',
-	SubGift = 'subGift',
-	SubsOnly = 'subsOnly',
-	Timeout = 'timeout',
-	Unhost = 'unhost',
-	Whisper = 'whisper',
+	BitsBadgeUpgrade = 'Twitch.bitsBadgeUpgrade',
+	Chat = 'Twitch.chat',
+	ChatClear = 'Twitch.chatClear',
+	Cheer = 'Twitch.cheer',
+	CommunitySub = 'Twitch.communitySub',
+	EmoteOnly = 'Twitch.emoteOnly',
+	FollowersOnly = 'Twitch.followersOnly',
+	Host = 'Twitch.host',
+	Hosted = 'Twitch.hosted',
+	HostsRemaining = 'Twitch.hostsRemaining',
+	Join = 'Twitch.join',
+	NewChatter = 'Twitch.newChatter',
+	Part = 'Twitch.part',
+	R9k = 'Twitch.r9k',
+	Raid = 'Twitch.raid',
+	Resub = 'Twitch.resub',
+	Ritual = 'Twitch.ritual',
+	Slow = 'Twitch.slow',
+	Sub = 'Twitch.sub',
+	SubGift = 'Twitch.subGift',
+	SubsOnly = 'Twitch.subsOnly',
+	Timeout = 'Twitch.timeout',
+	Unhost = 'Twitch.unhost',
+	Whisper = 'Twitch.whisper',
 }
 
 export interface TwitchEmoteOffsets {
@@ -421,6 +421,65 @@ export type TwitchMessageEvent = TwitchMessageEventBitsBadgeUpgrade
 
 export type ExtractTwitchMessage<T> = Extract<TwitchMessageEvent, { messageType: T }>['message'];
 
+export interface TwitchAlertBaseConfig {
+	templates?: string[];
+	videos: (string | {
+		video: string;
+		templates?: string[] | null;
+	})[];
+}
+
+export interface TwitchAlertStaticConfig extends TwitchAlertBaseConfig {
+	type: TwitchMessageType;
+}
+
+export interface TwitchAlertCallbackConfig {
+	type: TwitchMessageType;
+	callback: (message: any) => TwitchAlertBaseConfig | null;
+}
+
+export type TwitchAlertConfig = TwitchAlertStaticConfig | TwitchAlertCallbackConfig;
+
+export const isTwitchAlertCallbackConfig = (
+	config: TwitchAlertConfig,
+): config is TwitchAlertCallbackConfig => {
+	return !!(config as TwitchAlertCallbackConfig).callback;
+};
+
 export interface TwitchAlertsConfig extends ModuleConfig {
 	twitchModuleId: string;
+	screenId: string;
+	channel?: string;
+	alerts: TwitchAlertConfig[];
+}
+
+export enum VideoAlertsMessageType {
+	ShowAlert = 'VideoAlerts.showAlert',
+}
+
+export interface VideoAlertsEventShowAlert extends MessageEvent {
+	messageType: VideoAlertsMessageType.ShowAlert;
+	message: {
+		screenId: string;
+		message?: string;
+		video: string;
+	};
+}
+
+export interface ChyronConfig {
+	crawlMessages?: string[];
+}
+
+export enum ChyronMessageType {
+	RequestConfig = 'Chyron.requestConfig',
+	SetConfig = 'Chyron.setConfig',
+}
+
+export interface ChyronMessageEventRequestConfig extends MessageEvent {
+	messageType: ChyronMessageType.RequestConfig;
+}
+
+export interface ChyronMessageEventSetConfig extends MessageEvent {
+	messageType: ChyronMessageType.SetConfig;
+	message: ChyronConfig;
 }

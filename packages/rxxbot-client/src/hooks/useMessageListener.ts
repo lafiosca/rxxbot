@@ -8,6 +8,10 @@ import {
 interface UseMessageListenerFilter {
 	fromModuleId?: string;
 	messageType?: string;
+	message?: {
+		[field: string]: string;
+	};
+	customFilter?: (event: MessageEvent) => boolean;
 }
 
 export const useMessageListener = (
@@ -22,6 +26,18 @@ export const useMessageListener = (
 					return;
 				}
 				if (filter.messageType && event.messageType !== filter.messageType) {
+					return;
+				}
+				if (filter.message) {
+					const fields = Object.keys(filter.message);
+					for (let i = 0; i < fields.length; i += 1) {
+						const field = fields[i];
+						if (event.message[field] !== filter.message[field]) {
+							return;
+						}
+					}
+				}
+				if (filter.customFilter && !filter.customFilter(event)) {
 					return;
 				}
 				listener(event);

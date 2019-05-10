@@ -1,34 +1,62 @@
 import React, { useState } from 'react';
 import ReactPlayer from 'react-player';
-import { MessageEvent } from 'rxxbot-types';
+import { MessageEvent, VideoAlertsMessageType } from 'rxxbot-types';
 import { useMessageListener } from '../hooks/useMessageListener';
 import '../App.css';
 
 const assetsUrl = `${process.env.PUBLIC_URL}/assets`;
 
-const VideoAlerts = () => {
+export interface VideoAlertsConfig {
+	screenId: string;
+	fromModuleId?: string;
+}
+
+const defaultConfig = {
+	screenId: 'VideoAlerts',
+	fromModuleId: undefined,
+};
+
+interface Props {
+	config?: Partial<VideoAlertsConfig>;
+}
+
+const renderText = (text: string) => {
+	if (!text) {
+		return null;
+	}
+	return (
+		<React.Fragment>
+			{text}
+		</React.Fragment>
+	);
+};
+
+const VideoAlerts = (props: Props) => {
+	const config = {
+		...defaultConfig,
+		...(props.config || {}),
+	};
 	const [alertVideo, setAlertVideo] = useState<string | null>(null);
-	const [alertMessage, setAlertMessage] = useState<JSX.Element | null>(null);
+	const [alertText, setAlertText] = useState<JSX.Element | null>(null);
 	const [playing, setPlaying] = useState(false);
 	useMessageListener(
 		{
-			fromModuleId: 'TwitchAlerts',
-			messageType: 'videoAlert',
+			messageType: VideoAlertsMessageType.ShowAlert,
+			fromModuleId: config.fromModuleId,
+			message: {
+				screenId: config.screenId,
+			},
 		},
 		(event: MessageEvent) => {
 			console.log(`Received server message event: ${JSON.stringify(event, null, 2)}`);
 			if (playing) {
 				console.log('Video already playing!');
 			} else {
-				const video = event.message.video;
+				const { video, text } = event.message;
 				console.log(`Start video ${video}`);
 				setAlertVideo(video);
+				setAlertText(renderText(text));
 				setPlaying(true);
-				setAlertMessage((
-					<React.Fragment>
-						{event.message.message}
-					</React.Fragment>
-				));
 			}
 		},
 		[
@@ -36,8 +64,8 @@ const VideoAlerts = () => {
 			setAlertVideo,
 			playing,
 			setPlaying,
-			alertMessage,
-			setAlertMessage,
+			alertText,
+			setAlertText,
 		],
 	);
 	return (
@@ -50,8 +78,8 @@ const VideoAlerts = () => {
 			<div className="screenRow">
 				<div className="screenCell vcenter left">
 					<div className="alertTextCell bottom left">
-						<div className={playing ? 'alertText' : 'alertText hide'}>
-							{alertMessage}
+						<div className={(playing && alertText) ? 'alertText' : 'alertText hide'}>
+							{alertText}
 						</div>
 					</div>
 				</div>

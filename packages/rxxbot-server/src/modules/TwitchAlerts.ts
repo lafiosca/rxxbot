@@ -1,53 +1,77 @@
 import {
 	TwitchAlertsConfig,
-	TwitchMessageType,
-	ExtractTwitchMessage,
+	VideoAlertsMessageType,
+	isTwitchAlertCallbackConfig,
 } from 'rxxbot-types';
 import lodash from 'lodash';
 
 import AbstractConfigurableModule from './AbstractConfigurableModule';
 
-const videos = [
-	'macho-madness-ooh-yeah.mp4',
-	'bill-cipher-buy-gold.mp4',
-	'brent-rambo.mp4',
-];
+const defaultConfig: TwitchAlertsConfig = {
+	twitchModuleId: 'Twitch',
+	screenId: 'VideoAlerts',
+	alerts: [],
+};
 
 class TwitchAlerts extends AbstractConfigurableModule<TwitchAlertsConfig> {
 	constructor(config: Partial<TwitchAlertsConfig> = {}) {
 		super({
-			twitchModuleId: 'Twitch',
+			...defaultConfig,
 			...config,
 		});
 	}
 
-	protected handleTwitchMessage = <T extends TwitchMessageType>(
-		messageType: T,
-		message: ExtractTwitchMessage<T>,
-	) => {
-		switch (messageType) {
-			case TwitchMessageType.Chat: {
-				const chatMessage = message as ExtractTwitchMessage<TwitchMessageType.Chat>;
-				this.api!.sendMessage(
-					'videoAlert',
-					{
-						message: `Incoming chat message from ${chatMessage.user}`,
-						video: lodash.sample(videos),
-					},
-				);
-				break;
-			}
-		}
-	}
+	protected renderText = (template: string, message: any) =>
+		template.replace(/{(\w+)}/g, (match, field) => message[field])
 
 	protected onMessage = async (fromModuleId: string, messageType: string, message: any) => {
 		if (fromModuleId !== this.config.twitchModuleId) {
 			return;
 		}
-		return this.handleTwitchMessage(
-			messageType as TwitchMessageType,
-			message,
-		);
+		const { alerts, channel } = this.config;
+		for (let i = 0; i < alerts.length; i += 1) {
+			const alert = alerts[i];
+			if (channel && message.channel && `#${channel}` !== message.channel) {
+				continue;
+			}
+			if (messageType !== alert.type) {
+				continue;
+			}
+			const alertConfig = isTwitchAlertCallbackConfig(alert)
+				? alert.callback(message)
+				: alert;
+			if (!alertConfig) {
+				continue;
+			}
+			const videoPick = lodash.sample(alertConfig.videos);
+			if (!videoPick) {
+				continue;
+			}
+			let video: string | undefined;
+			let template: string | null | undefined;
+			if (typeof videoPick === 'string') {
+				video = videoPick;
+			} else {
+				video = videoPick.video;
+				if (videoPick.templates) {
+					template = lodash.sample(videoPick.templates);
+				} else {
+					template = videoPick.templates; // null or undefined
+				}
+			}
+			if (template === undefined && alertConfig.templates) {
+				template = lodash.sample(alertConfig.templates);
+			}
+			const text = template ? this.renderText(template, message) : undefined;
+			return this.api!.sendMessage(
+				VideoAlertsMessageType.ShowAlert,
+				{
+					video,
+					text,
+					screenId: this.config.screenId,
+				},
+			);
+		}
 	}
 }
 
