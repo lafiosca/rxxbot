@@ -13,7 +13,6 @@ export interface VideoAlertsConfig {
 
 const defaultConfig = {
 	screenId: 'VideoAlerts',
-	fromModuleId: undefined,
 };
 
 interface Props {

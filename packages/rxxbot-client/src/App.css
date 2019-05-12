@@ -102,6 +102,19 @@
   opacity: 0;
 }
 
+.chyronCrawl {
+  width: 100%;
+  font-family: 'c64';
+  font-size: 16px;
+  line-height: 18px;
+  color: green;
+  text-align: left;
+  background-color: black;
+  padding: 8px 0px;
+  transition: opacity 0.5s;
+  opacity: 1;
+}
+
 @font-face {
   font-family: 'c64';
   src: local('C64 Pro Mono'), url(./fonts/c64.ttf) format('truetype');
