@@ -467,8 +467,8 @@ export interface VideoAlertsEventShowAlert extends MessageEvent {
 }
 
 export interface ChyronConfig {
-	crawlMessages?: string[];
-	crawlDelay?: number;
+	crawlMessages: string[];
+	crawlDelay: number;
 }
 
 export enum ChyronMessageType {
@@ -482,5 +482,5 @@ export interface ChyronMessageEventRequestConfig extends MessageEvent {
 
 export interface ChyronMessageEventSetConfig extends MessageEvent {
 	messageType: ChyronMessageType.SetConfig;
-	message: ChyronConfig;
+	message: Partial<ChyronConfig>;
 }

@@ -17,7 +17,7 @@ interface UseMessageListenerFilter {
 export const useMessageListener = (
 	filter: UseMessageListenerFilter,
 	listener: (event: MessageEvent) => void,
-	deps?: any[] | undefined,
+	deps?: any[],
 ) => {
 	useEffect(
 		() => {

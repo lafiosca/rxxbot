@@ -113,6 +113,22 @@
   padding: 8px 0px;
   transition: opacity 0.5s;
   opacity: 1;
+  white-space: pre;
+}
+
+.chyronCrawl .regular {
+  display: inline;
+  color: green;
+}
+
+.chyronCrawl .highlight {
+  display: inline;
+  color: lightgreen;
+}
+
+.chyronCrawl .separator {
+  display: inline;
+  color: grey;
 }
 
 @font-face {

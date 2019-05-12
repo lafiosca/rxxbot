@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { MessageEvent, ChyronMessageType, ChyronConfig } from 'rxxbot-types';
+import lodash from 'lodash';
 import { useMessageListener } from '../hooks/useMessageListener';
 import { useInterval } from '../hooks/useInterval';
 import '../App.css';
@@ -13,19 +14,23 @@ const defaultScreenConfig = {
 	screenId: 'Chyron',
 };
 
-const defaultCrawlDelay = 200;
+const defaultConfig: ChyronConfig = {
+	crawlDelay: 250,
+	crawlMessages: [
+		'@rxxbot chyron initializing',
+		'Created by @lafiosca',
+	],
+};
+
+interface CrawlState {
+	upcoming: string[];
+	offset: number;
+	crawl: JSX.Element | null;
+}
 
 interface Props {
 	screenConfig?: Partial<ChyronScreenConfig>;
 }
-
-const renderCrawl = (text: string) => {
-	return (
-		<React.Fragment>
-			{text}
-		</React.Fragment>
-	);
-};
 
 const Chyron = (props: Props) => {
 	const screenConfig = {
@@ -33,10 +38,12 @@ const Chyron = (props: Props) => {
 		...(props.screenConfig || {}),
 	};
 
-	const [config, setConfig] = useState<ChyronConfig | null>(null);
-	const [crawlIndex, setCrawlIndex] = useState(0);
-	const [crawlOffset, setCrawlOffset] = useState(0);
-	const [crawl, setCrawl] = useState<JSX.Element | null>(null);
+	const [config, setConfig] = useState<ChyronConfig>(defaultConfig);
+	const [crawlState, setCrawlState] = useState<CrawlState>({
+		upcoming: [],
+		offset: 0,
+		crawl: null,
+	});
 
 	useEffect(
 		() => {
@@ -54,24 +61,70 @@ const Chyron = (props: Props) => {
 			},
 		},
 		(event: MessageEvent) => {
-			setConfig(event.message as ChyronConfig);
+			const configUpdate = event.message as Partial<ChyronConfig>;
+			setConfig({
+				crawlDelay: configUpdate.crawlDelay || defaultConfig.crawlDelay,
+				crawlMessages: (configUpdate.crawlMessages && configUpdate.crawlMessages.length > 0)
+					? configUpdate.crawlMessages
+					: defaultConfig.crawlMessages,
+			});
 		},
 		[setConfig],
 	);
 
 	useInterval(
 		() => {
-			console.log(`interval, crawlOffset = ${crawlOffset}`);
-			let text = '';
-			for (let i = 0; i < 80; i += 1) {
-				const n = (i + crawlOffset) % 11;
-				text = `${text}${(n === 10) ? '_' : n}`;
+			const upcoming = [...crawlState.upcoming];
+			const { offset } = crawlState;
+			const parts: JSX.Element[] = [];
+			let charCount = 0;
+			let upcomingIndex = 0;
+			let offsetRemaining = offset;
+			while (charCount < 80) {
+				let next: string;
+				if (upcoming.length === upcomingIndex) {
+					let tries = 0;
+					do {
+						next = lodash.sample(config.crawlMessages)!;
+						tries += 1;
+					} while (upcomingIndex > 0 && next === upcoming[upcomingIndex - 1] && tries < 5);
+					upcoming.push(next);
+				} else {
+					next = upcoming[upcomingIndex];
+				}
+				const words = [
+					...next.split(' '),
+					null, // message separator
+				];
+				words.forEach((word) => {
+					const aword = `${word || '***'} `;
+					const text = aword.substr(offsetRemaining, 80 - charCount);
+					offsetRemaining = Math.max(0, offsetRemaining - aword.length);
+					if (text) {
+						const className = (word === null)
+							? 'separator'
+							: (word[0] === '@' ? 'highlight' : 'regular');
+						parts.push(<div className={className} key={charCount}>{text}</div>);
+						charCount += text.length;
+					}
+				});
+				upcomingIndex += 1;
 			}
-			setCrawl(renderCrawl(text));
-			setCrawlOffset(crawlOffset + 1);
+			setCrawlState({
+				upcoming,
+				offset: offset + 1,
+				crawl: (
+					<React.Fragment>
+						{parts}
+					</React.Fragment>
+				),
+			});
 		},
-		config && config.crawlDelay || defaultCrawlDelay,
+		config.crawlDelay,
+		[config.crawlMessages, crawlState, setCrawlState],
 	);
+
+	const { crawl } = crawlState;
 
 	return (
 		<div className="screen">
