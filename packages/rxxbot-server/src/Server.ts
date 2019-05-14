@@ -9,6 +9,7 @@ import {
 	ModuleSpecMap,
 	ModuleApiMap,
 	ModuleApi,
+	MessageEvent,
 } from 'rxxbot-types';
 
 class Server {
@@ -61,12 +62,10 @@ class Server {
 		await this.moduleMap((moduleSpec) => moduleSpec.module.onEvent(event));
 	}
 
-	protected sendMessage = (fromModuleId: string, messageType: string, message: any) =>
+	protected sendMessage = (messageArgs: Pick<MessageEvent, Exclude<keyof MessageEvent, 'type'>>) =>
 		this.sendEvent({
-			fromModuleId,
-			messageType,
-			message,
 			type: ServerEventType.Message,
+			...messageArgs,
 		})
 
 	protected store = async (moduleId: string, key: string, value: string) => {
@@ -110,13 +109,23 @@ class Server {
 	protected buildApiForModule = (moduleSpec: ModuleSpec) => {
 		const api: ServerApi = {
 			sendMessage: (messageType: string, message: any) =>
-				this.sendMessage(moduleSpec.id, messageType, message),
+				this.sendMessage({
+					messageType,
+					message,
+					fromModuleId: moduleSpec.id,
+				}),
 			store: (key: string, value: string) => this.store(moduleSpec.id, key, value),
 			fetch: (key: string) => this.fetch(moduleSpec.id, key),
 			remove: (key: string) => this.remove(moduleSpec.id, key),
 		};
 		if (moduleSpec.privileged) {
 			api.heartbeat = this.heartbeat;
+			api.sendMessageFromScreen = (fromScreenId: string, messageType: string, message: any) =>
+				this.sendMessage({
+					fromScreenId,
+					messageType,
+					message,
+				});
 		}
 		return api;
 	}

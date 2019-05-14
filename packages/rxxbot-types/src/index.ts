@@ -66,11 +66,16 @@ export interface InitCompleteEvent {
 	type: ServerEventType.InitComplete;
 }
 
+export interface MessageEventMessage {
+	[key: string]: any;
+}
+
 export interface MessageEvent {
 	type: ServerEventType.Message;
-	fromModuleId: string;
+	fromModuleId?: string;
+	fromScreenId?: string;
 	messageType: string;
-	message: any;
+	message: MessageEventMessage;
 }
 
 export interface HeartbeatEvent {
@@ -80,11 +85,21 @@ export interface HeartbeatEvent {
 export type ServerEvent = InitCompleteEvent | MessageEvent | HeartbeatEvent;
 
 export interface ServerApi {
-	sendMessage: (messageType: string, message: any) => Promise<void>;
+	sendMessage: (messageType: string, message: MessageEventMessage) => Promise<void>;
 	store: (key: string, value: string) => Promise<void>;
 	fetch: (key: string) => Promise<string | null>;
 	remove: (key: string) => Promise<void>;
 	heartbeat?: () => Promise<void>;
+	sendMessageFromScreen?: (
+		screenId: string,
+		messageType: string,
+		message: MessageEventMessage,
+	) => Promise<void>;
+}
+
+export enum SocketIoEvent {
+	ServerEvent = 'serverEvent',
+	ScreenMessage = 'screenMessage',
 }
 
 export interface TwitchConfig extends ModuleConfig {
@@ -435,7 +450,7 @@ export interface TwitchAlertStaticConfig extends TwitchAlertBaseConfig {
 
 export interface TwitchAlertCallbackConfig {
 	type: TwitchMessageType;
-	callback: (message: any) => TwitchAlertBaseConfig | null;
+	callback: (message: MessageEventMessage) => TwitchAlertBaseConfig | null;
 }
 
 export type TwitchAlertConfig = TwitchAlertStaticConfig | TwitchAlertCallbackConfig;
@@ -448,7 +463,8 @@ export const isTwitchAlertCallbackConfig = (
 
 export interface TwitchAlertsConfig extends ModuleConfig {
 	twitchModuleId: string;
-	screenId: string;
+	videoAlertsScreenId: string;
+	chyronScreenId: string;
 	channel?: string;
 	alerts: TwitchAlertConfig[];
 }
@@ -482,5 +498,8 @@ export interface ChyronMessageEventRequestConfig extends MessageEvent {
 
 export interface ChyronMessageEventSetConfig extends MessageEvent {
 	messageType: ChyronMessageType.SetConfig;
-	message: Partial<ChyronConfig>;
+	message: {
+		screenId: string;
+		config: Partial<ChyronConfig>;
+	};
 }

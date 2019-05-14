@@ -4,6 +4,7 @@ import lodash from 'lodash';
 import { useMessageListener } from '../hooks/useMessageListener';
 import { useInterval } from '../hooks/useInterval';
 import '../App.css';
+import { getMessageSender } from '../services/socketIo';
 
 export interface ChyronScreenConfig {
 	screenId: string;
@@ -38,6 +39,8 @@ const Chyron = (props: Props) => {
 		...(props.screenConfig || {}),
 	};
 
+	const sendMessage = getMessageSender(screenConfig.screenId);
+
 	const [config, setConfig] = useState<ChyronConfig>(defaultConfig);
 	const [crawlState, setCrawlState] = useState<CrawlState>({
 		upcoming: [],
@@ -47,7 +50,7 @@ const Chyron = (props: Props) => {
 
 	useEffect(
 		() => {
-			// send requestConfig
+			sendMessage(ChyronMessageType.RequestConfig);
 		},
 		[], // only fire off once
 	);
@@ -61,7 +64,7 @@ const Chyron = (props: Props) => {
 			},
 		},
 		(event: MessageEvent) => {
-			const configUpdate = event.message as Partial<ChyronConfig>;
+			const configUpdate = event.message.config as Partial<ChyronConfig>;
 			setConfig({
 				crawlDelay: configUpdate.crawlDelay || defaultConfig.crawlDelay,
 				crawlMessages: (configUpdate.crawlMessages && configUpdate.crawlMessages.length > 0)

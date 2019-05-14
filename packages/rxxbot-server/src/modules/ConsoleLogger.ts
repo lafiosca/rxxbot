@@ -1,4 +1,4 @@
-import { ServerEvent, ServerEventType } from 'rxxbot-types';
+import { ServerEvent, ServerEventType, MessageEvent } from 'rxxbot-types';
 import AbstractConfigurableModule from './AbstractConfigurableModule';
 
 export interface ConsoleLoggerConfig {}
@@ -21,9 +21,15 @@ class ConsoleLogger extends AbstractConfigurableModule<ConsoleLoggerConfig> {
 		return this.superOnEvent(event);
 	}
 
-	protected onMessage = async (fromModuleId: string, messageType: string, message: any) => {
+	protected onMessage = async ({
+		fromModuleId,
+		fromScreenId,
+		messageType,
+		message,
+	}: MessageEvent) => {
 		console.log(
-			`Message from ${fromModuleId}, type '${messageType}': ${JSON.stringify(message, null, 2)}`,
+			`Message from ${fromModuleId ? `module ${fromModuleId}` : `screen ${fromScreenId}`}, `
+				+ `type '${messageType}': ${JSON.stringify(message, null, 2)}`,
 		);
 	}
 }

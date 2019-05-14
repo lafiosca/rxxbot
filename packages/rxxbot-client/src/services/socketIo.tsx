@@ -4,6 +4,8 @@ import {
 	ServerEventType,
 	MessageEvent,
 	HeartbeatEvent,
+	SocketIoEvent,
+	MessageEventMessage,
 } from 'rxxbot-types';
 
 type Listener = (event: ServerEvent) => void;
@@ -26,14 +28,14 @@ const metaListener = (event: ServerEvent) => {
 	}
 };
 
-socket.on('serverEvent', metaListener);
+socket.on(SocketIoEvent.ServerEvent, metaListener);
 
 export const addServerEventListener = (listener: Listener) => {
-	socket.on('serverEvent', listener);
+	socket.on(SocketIoEvent.ServerEvent, listener);
 };
 
 export const removeServerEventListener = (listener: Listener) => {
-	socket.off('serverEvent', listener);
+	socket.off(SocketIoEvent.ServerEvent, listener);
 };
 
 export const addMessageListener = (listener: MessageListener) => {
@@ -61,3 +63,22 @@ export const removeHeartbeatListener = (listener: HearbeatListener) => {
 		}
 	}
 };
+
+export const sendMessage = (
+	fromScreenId: string,
+	messageType: string,
+	message: MessageEventMessage = {},
+) => {
+	socket.emit(
+		SocketIoEvent.ScreenMessage,
+		{
+			fromScreenId,
+			messageType,
+			message,
+		},
+	);
+};
+
+export const getMessageSender = (screenId: string) =>
+	(messageType: string, message: MessageEventMessage = {}) =>
+		sendMessage(screenId, messageType, message);

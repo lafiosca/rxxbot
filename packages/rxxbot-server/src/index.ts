@@ -15,7 +15,10 @@ import twitchConfig from './config/twitch.json';
 const serverConfig: ServerConfig = {
 	modules: [
 		new MemoryStore(),
-		new SocketIo(),
+		{
+			module: new SocketIo(),
+			privileged: true,
+		},
 		new ConsoleLogger(),
 		new Twitch(twitchConfig),
 		new TwitchAlerts({
@@ -37,12 +40,20 @@ const serverConfig: ServerConfig = {
 							video: 'brent-rambo.mp4',
 							templates: null,
 						},
+						{
+							video: 'come-play-with-us.mp4',
+							templates: ['Come play with us, @{user}! Forever and ever and ever!'],
+						},
+						{
+							video: 'kitty-city.mp4',
+							templates: ['Welcome to kitty city, @{user}!'],
+						},
 					],
 				},
 				{
 					type: TwitchMessageType.Join,
-					callback: (message: TwitchMessageEventJoin['message']) => {
-						switch (message.user) {
+					callback: (message) => {
+						switch ((message as TwitchMessageEventJoin['message']).user) {
 							case 'slurpeeeye':
 								return {
 									videos: ['bill-cipher-buy-gold.mp4'],

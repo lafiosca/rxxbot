@@ -1,5 +1,5 @@
 import socketIo, { Server, Socket } from 'socket.io';
-import { ServerEvent } from 'rxxbot-types';
+import { ServerEvent, SocketIoEvent } from 'rxxbot-types';
 import AbstractConfigurableModule from './AbstractConfigurableModule';
 
 export interface SocketIoConfig {
@@ -28,19 +28,21 @@ class SocketIo extends AbstractConfigurableModule<SocketIoConfig> {
 	protected handleConnection = (socket: Socket) => {
 		console.log(`Socket ${socket.id} connected`);
 		socket.on('disconnect', this.createDisconnectHandler(socket));
-		socket.on('command', this.createCommandHandler(socket));
+		socket.on(SocketIoEvent.ScreenMessage, this.createMessageHandler(socket));
 	}
 
 	protected createDisconnectHandler = (socket: Socket) => () => {
 		console.log(`Socket ${socket.id} disconnected`);
 	}
 
-	protected createCommandHandler = (socket: Socket) => (payload: any) => {
-		console.log(`Received command from socket ${socket.id}: ${JSON.stringify(payload, null, 2)}`);
+	protected createMessageHandler = (socket: Socket) => (payload: any) => {
+		console.log(`Received message from socket ${socket.id}: ${JSON.stringify(payload, null, 2)}`);
+		const { fromScreenId, messageType, message } = payload;
+		this.api!.sendMessageFromScreen!(fromScreenId, messageType, message);
 	}
 
 	public onEvent = async (event: ServerEvent) => {
-		this.io.emit('serverEvent', event);
+		this.io.emit(SocketIoEvent.ServerEvent, event);
 		this.superOnEvent(event);
 	}
 }

@@ -5,6 +5,7 @@ import {
 	ServerApi,
 	ModuleApi,
 	ModuleType,
+	MessageEvent,
 } from 'rxxbot-types';
 
 abstract class AbstractBasicModule implements BasicModule {
@@ -24,7 +25,7 @@ abstract class AbstractBasicModule implements BasicModule {
 				await this.onInitComplete();
 				break;
 			case ServerEventType.Message:
-				await this.onMessage(event.fromModuleId, event.messageType, event.message);
+				await this.onMessage(event);
 				break;
 			case ServerEventType.Heartbeat:
 				await this.onHeartbeat();
@@ -34,7 +35,7 @@ abstract class AbstractBasicModule implements BasicModule {
 
 	protected init = async (): Promise<ModuleApi | void> => {};
 	protected onInitComplete = async () => {};
-	protected onMessage = async (fromModuleId: string, messageType: string, message: any) => {};
+	protected onMessage = async (event: MessageEvent) => {};
 	protected onHeartbeat = async () => {};
 }
 

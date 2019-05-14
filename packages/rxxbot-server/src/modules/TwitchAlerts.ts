@@ -2,6 +2,8 @@ import {
 	TwitchAlertsConfig,
 	VideoAlertsMessageType,
 	isTwitchAlertCallbackConfig,
+	MessageEvent,
+	ChyronMessageType,
 } from 'rxxbot-types';
 import lodash from 'lodash';
 
@@ -9,7 +11,8 @@ import AbstractConfigurableModule from './AbstractConfigurableModule';
 
 const defaultConfig: TwitchAlertsConfig = {
 	twitchModuleId: 'Twitch',
-	screenId: 'VideoAlerts',
+	videoAlertsScreenId: 'VideoAlerts',
+	chyronScreenId: 'Chyron',
 	alerts: [],
 };
 
@@ -24,10 +27,7 @@ class TwitchAlerts extends AbstractConfigurableModule<TwitchAlertsConfig> {
 	protected renderText = (template: string, message: any) =>
 		template.replace(/{(\w+)}/g, (match, field) => message[field])
 
-	protected onMessage = async (fromModuleId: string, messageType: string, message: any) => {
-		if (fromModuleId !== this.config.twitchModuleId) {
-			return;
-		}
+	protected onTwitchMessage = async ({ messageType, message }: MessageEvent) => {
 		const { alerts, channel } = this.config;
 		for (let i = 0; i < alerts.length; i += 1) {
 			const alert = alerts[i];
@@ -68,9 +68,37 @@ class TwitchAlerts extends AbstractConfigurableModule<TwitchAlertsConfig> {
 				{
 					video,
 					text,
-					screenId: this.config.screenId,
+					screenId: this.config.videoAlertsScreenId,
 				},
 			);
+		}
+	}
+
+	protected onChyronMessage = async ({ messageType }: MessageEvent) => {
+		if (messageType === ChyronMessageType.RequestConfig) {
+			this.api!.sendMessage(
+				ChyronMessageType.SetConfig,
+				{
+					screenId: this.config.chyronScreenId,
+					config: {
+						crawlMessages: [
+							'test message #23',
+							'fnord!',
+							'imposition of order = escalation of chaos',
+							'@rxxbot created by @lafiosca',
+						],
+					},
+				},
+			);
+		}
+	}
+
+	protected onMessage = async (event: MessageEvent) => {
+		if (event.fromScreenId === this.config.chyronScreenId) {
+			return this.onChyronMessage(event);
+		}
+		if (event.fromModuleId === this.config.twitchModuleId) {
+			return this.onTwitchMessage(event);
 		}
 	}
 }
