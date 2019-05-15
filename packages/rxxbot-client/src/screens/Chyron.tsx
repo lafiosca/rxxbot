@@ -75,10 +75,35 @@ const Chyron = (props: Props) => {
 		[setConfig],
 	);
 
+	useMessageListener(
+		{
+			messageType: ChyronMessageType.QueueCrawlMessage,
+			fromModuleId: screenConfig.fromModuleId,
+			message: {
+				screenId: screenConfig.screenId,
+			},
+		},
+		(event: MessageEvent) => {
+			console.log(`received queueCrawlMessage: ${event.message.crawlMessage}`);
+			setCrawlState({
+				...crawlState,
+				upcoming: [
+					...crawlState.upcoming,
+					event.message.crawlMessage,
+				],
+			});
+		},
+		[setCrawlState, crawlState],
+	);
+
 	useInterval(
 		() => {
 			const upcoming = [...crawlState.upcoming];
-			const { offset } = crawlState;
+			let { offset } = crawlState;
+			if (upcoming.length > 0 && offset === upcoming[0].length + 5) {
+				offset = 0;
+				upcoming.shift();
+			}
 			const parts: JSX.Element[] = [];
 			let charCount = 0;
 			let upcomingIndex = 0;
@@ -90,7 +115,11 @@ const Chyron = (props: Props) => {
 					do {
 						next = lodash.sample(config.crawlMessages)!;
 						tries += 1;
-					} while (upcomingIndex > 0 && next === upcoming[upcomingIndex - 1] && tries < 5);
+					} while (
+						upcomingIndex > 0
+						&& next === upcoming[upcomingIndex - 1]
+						&& config.crawlMessages.length > 1
+						&& tries < 9);
 					upcoming.push(next);
 				} else {
 					next = upcoming[upcomingIndex];

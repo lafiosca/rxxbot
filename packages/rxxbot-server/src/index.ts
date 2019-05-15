@@ -26,27 +26,36 @@ const serverConfig: ServerConfig = {
 			alerts: [
 				{
 					type: TwitchMessageType.Chat,
-					templates: [
+					captionTemplates: [
 						'Incoming chat message from @{user}',
 						'More words from @{user}',
 					],
 					videos: [
 						{
-							video: 'macho-madness-ooh-yeah.mp4',
-							templates: ['Ooh yeah, {user}\'s talkin!'],
-						},
-						'bill-cipher-buy-gold.mp4',
-						{
-							video: 'brent-rambo.mp4',
-							templates: null,
+							video: 'follow/macho-madness-ooh-yeah.mp4',
+							captionTemplates: ['Ooh yeah, @{user}\'s talkin!'],
 						},
 						{
-							video: 'come-play-with-us.mp4',
-							templates: ['Come play with us, @{user}! Forever and ever and ever!'],
+							video: 'triggers/bill-cipher-buy-gold.mp4',
+							crawlTemplates: [
+								'Remember! Reality\'s an illusion, the universe is a hologram, buy gold! Byeeee!',
+							],
 						},
 						{
-							video: 'kitty-city.mp4',
-							templates: ['Welcome to kitty city, @{user}!'],
+							video: 'follow/brent-rambo.mp4',
+							captionTemplates: null,
+							crawlTemplates: [
+								'Thumbs up to @{user}!',
+								'Macs rule the world!',
+							],
+						},
+						{
+							video: 'follow/come-play-with-us.mp4',
+							captionTemplates: ['Come play with us, @{user}! Forever and ever and ever!'],
+						},
+						{
+							video: 'follow/kitty-city.mp4',
+							captionTemplates: ['Welcome to kitty city, @{user}!'],
 						},
 					],
 				},
@@ -57,7 +66,7 @@ const serverConfig: ServerConfig = {
 							case 'slurpeeeye':
 								return {
 									videos: ['bill-cipher-buy-gold.mp4'],
-									templates: ['Hey, it\'s @SlurpeeEye!'],
+									captionTemplates: ['Hey, it\'s @SlurpeeEye!'],
 								};
 							default:
 								return null;

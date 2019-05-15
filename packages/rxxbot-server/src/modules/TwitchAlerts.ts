@@ -48,22 +48,32 @@ class TwitchAlerts extends AbstractConfigurableModule<TwitchAlertsConfig> {
 				continue;
 			}
 			let video: string | undefined;
-			let template: string | null | undefined;
+			let captionTemplate: string | null | undefined;
+			let crawlTemplate: string | null | undefined;
 			if (typeof videoPick === 'string') {
 				video = videoPick;
 			} else {
 				video = videoPick.video;
-				if (videoPick.templates) {
-					template = lodash.sample(videoPick.templates);
+				if (videoPick.captionTemplates) {
+					captionTemplate = lodash.sample(videoPick.captionTemplates);
 				} else {
-					template = videoPick.templates; // null or undefined
+					captionTemplate = videoPick.captionTemplates; // null or undefined
+				}
+				if (videoPick.crawlTemplates) {
+					crawlTemplate = lodash.sample(videoPick.crawlTemplates);
+				} else {
+					crawlTemplate = videoPick.crawlTemplates; // null or undefined
 				}
 			}
-			if (template === undefined && alertConfig.templates) {
-				template = lodash.sample(alertConfig.templates);
+			if (captionTemplate === undefined && alertConfig.captionTemplates) {
+				captionTemplate = lodash.sample(alertConfig.captionTemplates);
 			}
-			const text = template ? this.renderText(template, message) : undefined;
-			return this.api!.sendMessage(
+			if (crawlTemplate === undefined && alertConfig.crawlTemplates) {
+				crawlTemplate = lodash.sample(alertConfig.crawlTemplates);
+			}
+			const text = captionTemplate ? this.renderText(captionTemplate, message) : undefined;
+			const crawlMessage = crawlTemplate ? this.renderText(crawlTemplate, message) : undefined;
+			this.api!.sendMessage(
 				VideoAlertsMessageType.ShowAlert,
 				{
 					video,
@@ -71,6 +81,16 @@ class TwitchAlerts extends AbstractConfigurableModule<TwitchAlertsConfig> {
 					screenId: this.config.videoAlertsScreenId,
 				},
 			);
+			if (crawlMessage) {
+				this.api!.sendMessage(
+					ChyronMessageType.QueueCrawlMessage,
+					{
+						crawlMessage,
+						screenId: this.config.chyronScreenId,
+					},
+				);
+			}
+			return;
 		}
 	}
 

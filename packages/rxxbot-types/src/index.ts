@@ -437,10 +437,12 @@ export type TwitchMessageEvent = TwitchMessageEventBitsBadgeUpgrade
 export type ExtractTwitchMessage<T> = Extract<TwitchMessageEvent, { messageType: T }>['message'];
 
 export interface TwitchAlertBaseConfig {
-	templates?: string[];
+	captionTemplates?: string[];
+	crawlTemplates?: string[];
 	videos: (string | {
 		video: string;
-		templates?: string[] | null;
+		captionTemplates?: string[] | null;
+		crawlTemplates?: string[] | null;
 	})[];
 }
 
@@ -477,8 +479,8 @@ export interface VideoAlertsEventShowAlert extends MessageEvent {
 	messageType: VideoAlertsMessageType.ShowAlert;
 	message: {
 		screenId: string;
-		message?: string;
 		video: string;
+		text?: string;
 	};
 }
 
@@ -490,6 +492,7 @@ export interface ChyronConfig {
 export enum ChyronMessageType {
 	RequestConfig = 'Chyron.requestConfig',
 	SetConfig = 'Chyron.setConfig',
+	QueueCrawlMessage = 'Chyron.queueCrawlMessage',
 }
 
 export interface ChyronMessageEventRequestConfig extends MessageEvent {
@@ -501,5 +504,12 @@ export interface ChyronMessageEventSetConfig extends MessageEvent {
 	message: {
 		screenId: string;
 		config: Partial<ChyronConfig>;
+	};
+}
+
+export interface ChyronMessageEventQueueCrawlMessage extends MessageEvent {
+	messageType: ChyronMessageType.QueueCrawlMessage;
+	message: {
+		crawlMessage: string;
 	};
 }
