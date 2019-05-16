@@ -11,12 +11,14 @@ export interface ChyronScreenConfig {
 	fromModuleId?: string;
 }
 
+const chyronWidth = 10;
+
 const defaultScreenConfig = {
 	screenId: 'Chyron',
 };
 
 const defaultConfig: ChyronConfig = {
-	crawlDelay: 250,
+	crawlDelay: 2000,
 	crawlMessages: [
 		'@rxxbot chyron initializing',
 		'Created by @lafiosca',
@@ -24,14 +26,43 @@ const defaultConfig: ChyronConfig = {
 };
 
 interface CrawlState {
-	upcoming: string[];
-	offset: number;
-	crawl: JSX.Element | null;
+	crawl: {
+		char: string;
+		className: string;
+	}[];
+	lastMessage: string | null;
 }
 
 interface Props {
 	screenConfig?: Partial<ChyronScreenConfig>;
 }
+
+const renderCrawlMessage = (message: string) => {
+	const crawl: CrawlState['crawl'] = [];
+	const words = message.split(' ');
+	words.forEach((word) => {
+		Array.from(word).forEach((char) => {
+			crawl.push({
+				char,
+				className: word[0] === '@' ? 'highlight' : 'regular',
+			});
+		});
+		crawl.push({ char: ' ', className: 'regular' });
+	});
+	crawl.push({ char: '*', className: 'separator' });
+	crawl.push({ char: '*', className: 'separator' });
+	crawl.push({ char: '*', className: 'separator' });
+	crawl.push({ char: ' ', className: 'regular' });
+	return crawl;
+};
+
+const initializeCrawl = () => {
+	const crawl: CrawlState['crawl'] = [];
+	for (let i = 0; i < chyronWidth; i += 1) {
+		crawl.push({ char: ' ', className: 'regular' });
+	}
+	return crawl;
+};
 
 const Chyron = (props: Props) => {
 	const screenConfig = {
@@ -43,9 +74,8 @@ const Chyron = (props: Props) => {
 
 	const [config, setConfig] = useState<ChyronConfig>(defaultConfig);
 	const [crawlState, setCrawlState] = useState<CrawlState>({
-		upcoming: [],
-		offset: 0,
-		crawl: null,
+		crawl: initializeCrawl(),
+		lastMessage: null,
 	});
 
 	useEffect(
@@ -85,75 +115,46 @@ const Chyron = (props: Props) => {
 		},
 		(event: MessageEvent) => {
 			console.log(`received queueCrawlMessage: ${event.message.crawlMessage}`);
-			setCrawlState({
+			const newState = {
 				...crawlState,
-				upcoming: [
-					...crawlState.upcoming,
-					event.message.crawlMessage,
+				crawl: [
+					...crawlState.crawl,
+					...renderCrawlMessage(event.message.crawlMessage),
 				],
-			});
+			};
+			console.log(`update crawl: ${newState.crawl.map((x) => x.char).join('')}`);
+			setCrawlState(newState);
 		},
-		[setCrawlState, crawlState],
+		[setCrawlState, crawlState.crawl.length],
 	);
 
 	useInterval(
 		() => {
-			const upcoming = [...crawlState.upcoming];
-			let { offset } = crawlState;
-			if (upcoming.length > 0 && offset === upcoming[0].length + 5) {
-				offset = 0;
-				upcoming.shift();
-			}
-			const parts: JSX.Element[] = [];
-			let charCount = 0;
-			let upcomingIndex = 0;
-			let offsetRemaining = offset;
-			while (charCount < 80) {
-				let next: string;
-				if (upcoming.length === upcomingIndex) {
-					let tries = 0;
-					do {
-						next = lodash.sample(config.crawlMessages)!;
-						tries += 1;
-					} while (
-						upcomingIndex > 0
-						&& next === upcoming[upcomingIndex - 1]
-						&& config.crawlMessages.length > 1
-						&& tries < 9);
-					upcoming.push(next);
-				} else {
-					next = upcoming[upcomingIndex];
-				}
-				const words = [
-					...next.split(' '),
-					null, // message separator
+			let { crawl, lastMessage } = crawlState;
+			crawl = crawl.slice(1);
+			while (crawl.length < chyronWidth) {
+				let tries = 0;
+				let nextMessage: string;
+				do {
+					nextMessage = lodash.sample(config.crawlMessages)!;
+					tries += 1;
+				} while (nextMessage === lastMessage
+					&& config.crawlMessages.length > 1
+					&& tries < 9);
+				crawl = [
+					...crawl,
+					...renderCrawlMessage(nextMessage),
 				];
-				words.forEach((word) => {
-					const aword = `${word || '***'} `;
-					const text = aword.substr(offsetRemaining, 80 - charCount);
-					offsetRemaining = Math.max(0, offsetRemaining - aword.length);
-					if (text) {
-						const className = (word === null)
-							? 'separator'
-							: (word[0] === '@' ? 'highlight' : 'regular');
-						parts.push(<div className={className} key={charCount}>{text}</div>);
-						charCount += text.length;
-					}
-				});
-				upcomingIndex += 1;
+				lastMessage = nextMessage;
 			}
+			console.log(`update crawl: ${crawl.map((x) => x.char).join('')}`);
 			setCrawlState({
-				upcoming,
-				offset: offset + 1,
-				crawl: (
-					<React.Fragment>
-						{parts}
-					</React.Fragment>
-				),
+				crawl,
+				lastMessage,
 			});
 		},
 		config.crawlDelay,
-		[config.crawlMessages, crawlState, setCrawlState],
+		[config.crawlMessages, crawlState.crawl.length, setCrawlState],
 	);
 
 	const { crawl } = crawlState;
@@ -165,7 +166,10 @@ const Chyron = (props: Props) => {
 			<div className="screenRow bottom">
 				{crawl && (
 					<div className="chyronCrawl">
-						{crawl}
+						{crawl.slice(0, chyronWidth)
+							.map(({ char, className }, i) => (
+								<div key={i} className={className}>{char}</div>
+						))}
 					</div>
 				)}
 			</div>

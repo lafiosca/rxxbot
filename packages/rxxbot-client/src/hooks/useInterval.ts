@@ -10,6 +10,7 @@ export const useInterval = (
 
 	useEffect(
 		() => {
+			console.log('resetting useInterval callback memo');
 			savedCallback.current = memo;
 		},
 		[memo],
@@ -17,6 +18,7 @@ export const useInterval = (
 
 	useEffect(
 		() => {
+			console.log('resetting useInterval setInterval');
 			if (delay !== null) {
 				const id = setInterval(
 					() => {

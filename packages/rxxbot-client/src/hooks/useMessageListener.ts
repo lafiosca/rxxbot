@@ -42,8 +42,12 @@ export const useMessageListener = (
 				}
 				listener(event);
 			};
+			// console.log('adding message listener');
 			addMessageListener(filteringListener);
-			return () => removeMessageListener(filteringListener);
+			return () => {
+				// console.log('removing message listener');
+				removeMessageListener(filteringListener);
+			};
 		},
 		deps,
 	);

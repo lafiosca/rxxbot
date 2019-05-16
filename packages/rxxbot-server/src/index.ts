@@ -30,6 +30,10 @@ const serverConfig: ServerConfig = {
 						'Incoming chat message from @{user}',
 						'More words from @{user}',
 					],
+					crawlTemplates: [
+						'arbitrary crawl test',
+						'other crawl test',
+					],
 					videos: [
 						{
 							video: 'follow/macho-madness-ooh-yeah.mp4',
