@@ -1,31 +1,36 @@
-import React, { useState, useEffect } from 'react';
+import React, { useReducer, useEffect } from 'react';
 import { MessageEvent, ChyronMessageType, ChyronConfig } from 'rxxbot-types';
 import lodash from 'lodash';
 import { useMessageListener } from '../hooks/useMessageListener';
 import { useInterval } from '../hooks/useInterval';
-import '../App.css';
 import { getMessageSender } from '../services/socketIo';
+import '../App.css';
 
 export interface ChyronScreenConfig {
 	screenId: string;
 	fromModuleId?: string;
 }
 
-const chyronWidth = 10;
+const chyronWidth = 80;
 
 const defaultScreenConfig = {
 	screenId: 'Chyron',
 };
 
 const defaultConfig: ChyronConfig = {
-	crawlDelay: 2000,
+	crawlDelay: 200,
 	crawlMessages: [
 		'@rxxbot chyron initializing',
 		'Created by @lafiosca',
 	],
 };
 
-interface CrawlState {
+interface Props {
+	screenConfig?: Partial<ChyronScreenConfig>;
+}
+
+interface State {
+	config: ChyronConfig;
 	crawl: {
 		char: string;
 		className: string;
@@ -33,12 +38,34 @@ interface CrawlState {
 	lastMessage: string | null;
 }
 
-interface Props {
-	screenConfig?: Partial<ChyronScreenConfig>;
+enum ActionType {
+	SetConfig = 'setConfig',
+	UpdateCrawl = 'updateCrawl',
+	QueueCrawlMessage = 'queueCrawlMessage',
 }
 
+interface SetConfigAction {
+	type: ActionType.SetConfig;
+	payload: {
+		config: Partial<ChyronConfig>;
+	};
+}
+
+interface UpdateCrawlAction {
+	type: ActionType.UpdateCrawl;
+}
+
+interface QueueCrawlMessageAction {
+	type: ActionType.QueueCrawlMessage;
+	payload: {
+		crawlMessage: string;
+	};
+}
+
+type Action = SetConfigAction | UpdateCrawlAction | QueueCrawlMessageAction;
+
 const renderCrawlMessage = (message: string) => {
-	const crawl: CrawlState['crawl'] = [];
+	const crawl: State['crawl'] = [];
 	const words = message.split(' ');
 	words.forEach((word) => {
 		Array.from(word).forEach((char) => {
@@ -57,11 +84,65 @@ const renderCrawlMessage = (message: string) => {
 };
 
 const initializeCrawl = () => {
-	const crawl: CrawlState['crawl'] = [];
+	const crawl: State['crawl'] = [];
 	for (let i = 0; i < chyronWidth; i += 1) {
 		crawl.push({ char: ' ', className: 'regular' });
 	}
 	return crawl;
+};
+
+const reducer = (state: State, action: Action): State => {
+	switch (action.type) {
+		case ActionType.SetConfig: {
+			const { config } = action.payload;
+			return {
+				...state,
+				config: {
+					crawlDelay: config.crawlDelay || state.config.crawlDelay,
+					crawlMessages: (config.crawlMessages && config.crawlMessages.length > 0)
+						? config.crawlMessages
+						: state.config.crawlMessages,
+				},
+			};
+		}
+		case ActionType.UpdateCrawl: {
+			const { config } = state;
+			let crawl = state.crawl.slice(1);
+			let lastMessage = state.lastMessage;
+			while (crawl.length < chyronWidth) {
+				let tries = 0;
+				let nextMessage: string;
+				do {
+					nextMessage = lodash.sample(state.config.crawlMessages)!;
+					tries += 1;
+				} while (nextMessage === lastMessage
+					&& config.crawlMessages.length > 1
+					&& tries < 9);
+				crawl = [
+					...crawl,
+					...renderCrawlMessage(nextMessage),
+				];
+				lastMessage = nextMessage;
+			}
+			return {
+				...state,
+				crawl,
+				lastMessage,
+			};
+		}
+		case ActionType.QueueCrawlMessage: {
+			const { crawlMessage } = action.payload;
+			return {
+				...state,
+				crawl: [
+					...state.crawl,
+					...renderCrawlMessage(crawlMessage),
+				],
+			};
+		}
+		default:
+			return state;
+	}
 };
 
 const Chyron = (props: Props) => {
@@ -72,8 +153,8 @@ const Chyron = (props: Props) => {
 
 	const sendMessage = getMessageSender(screenConfig.screenId);
 
-	const [config, setConfig] = useState<ChyronConfig>(defaultConfig);
-	const [crawlState, setCrawlState] = useState<CrawlState>({
+	const [state, dispatch] = useReducer(reducer, {
+		config: defaultConfig,
 		crawl: initializeCrawl(),
 		lastMessage: null,
 	});
@@ -94,15 +175,13 @@ const Chyron = (props: Props) => {
 			},
 		},
 		(event: MessageEvent) => {
-			const configUpdate = event.message.config as Partial<ChyronConfig>;
-			setConfig({
-				crawlDelay: configUpdate.crawlDelay || defaultConfig.crawlDelay,
-				crawlMessages: (configUpdate.crawlMessages && configUpdate.crawlMessages.length > 0)
-					? configUpdate.crawlMessages
-					: defaultConfig.crawlMessages,
+			const config = event.message.config as Partial<ChyronConfig>;
+			dispatch({
+				type: ActionType.SetConfig,
+				payload: { config },
 			});
 		},
-		[setConfig],
+		[dispatch],
 	);
 
 	useMessageListener(
@@ -114,50 +193,22 @@ const Chyron = (props: Props) => {
 			},
 		},
 		(event: MessageEvent) => {
-			console.log(`received queueCrawlMessage: ${event.message.crawlMessage}`);
-			const newState = {
-				...crawlState,
-				crawl: [
-					...crawlState.crawl,
-					...renderCrawlMessage(event.message.crawlMessage),
-				],
-			};
-			console.log(`update crawl: ${newState.crawl.map((x) => x.char).join('')}`);
-			setCrawlState(newState);
+			const { crawlMessage } = event.message;
+			dispatch({
+				type: ActionType.QueueCrawlMessage,
+				payload: { crawlMessage },
+			});
 		},
-		[setCrawlState, crawlState.crawl.length],
+		[dispatch],
 	);
 
 	useInterval(
-		() => {
-			let { crawl, lastMessage } = crawlState;
-			crawl = crawl.slice(1);
-			while (crawl.length < chyronWidth) {
-				let tries = 0;
-				let nextMessage: string;
-				do {
-					nextMessage = lodash.sample(config.crawlMessages)!;
-					tries += 1;
-				} while (nextMessage === lastMessage
-					&& config.crawlMessages.length > 1
-					&& tries < 9);
-				crawl = [
-					...crawl,
-					...renderCrawlMessage(nextMessage),
-				];
-				lastMessage = nextMessage;
-			}
-			console.log(`update crawl: ${crawl.map((x) => x.char).join('')}`);
-			setCrawlState({
-				crawl,
-				lastMessage,
-			});
-		},
-		config.crawlDelay,
-		[config.crawlMessages, crawlState.crawl.length, setCrawlState],
+		() => dispatch({ type: ActionType.UpdateCrawl }),
+		state.config.crawlDelay,
+		[dispatch],
 	);
 
-	const { crawl } = crawlState;
+	const { crawl } = state;
 
 	return (
 		<div className="screen">

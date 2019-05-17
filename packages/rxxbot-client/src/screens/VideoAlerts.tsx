@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useReducer } from 'react';
 import ReactPlayer from 'react-player';
 import { MessageEvent, VideoAlertsMessageType } from 'rxxbot-types';
 import { useMessageListener } from '../hooks/useMessageListener';
@@ -19,15 +19,105 @@ interface Props {
 	config?: Partial<VideoAlertsConfig>;
 }
 
+interface AlertTextChar {
+	char: string;
+	className: string;
+}
+
+interface State {
+	alertVideo: string | null;
+	alertText: AlertTextChar[] | null;
+	queue: {
+		alertVideo: string;
+		alertText: AlertTextChar[] | null;
+	}[];
+	playing: boolean;
+}
+
+enum ActionType {
+	QueueVideo = 'queueVideo',
+	EndPlayback = 'endPlayback',
+	PlayQueuedVideo = 'playQueuedVideo',
+}
+
+interface QueueVideoAction {
+	type: ActionType.QueueVideo;
+	payload: {
+		video: string;
+		text: string;
+	};
+}
+
+interface EndPlaybackAction {
+	type: ActionType.EndPlayback;
+}
+
+interface PlayQueuedVideoAction {
+	type: ActionType.PlayQueuedVideo;
+}
+
+type Action = QueueVideoAction | EndPlaybackAction | PlayQueuedVideoAction;
+
 const renderText = (text: string) => {
 	if (!text) {
 		return null;
 	}
-	return (
-		<React.Fragment>
-			{text}
-		</React.Fragment>
-	);
+	const rendered: AlertTextChar[] = [];
+	const words = text.split(' ');
+	words.forEach((word) => {
+		Array.from(word).forEach((char) => {
+			rendered.push({
+				char,
+				className: word[0] === '@' ? 'highlight' : 'regular',
+			});
+		});
+		rendered.push({ char: ' ', className: 'regular' });
+	});
+	return rendered;
+};
+
+const reducer = (state: State, action: Action): State => {
+	switch (action.type) {
+		case ActionType.QueueVideo: {
+			const { video, text } = action.payload;
+			if (state.playing || state.queue.length > 0) {
+				return {
+					...state,
+					queue: [
+						...state.queue,
+						{
+							alertVideo: video,
+							alertText: renderText(text),
+						},
+					],
+				};
+			}
+			return {
+				...state,
+				alertVideo: video,
+				alertText: renderText(text),
+				playing: true,
+			};
+		}
+		case ActionType.EndPlayback: {
+			return {
+				...state,
+				playing: false,
+			};
+		}
+		case ActionType.PlayQueuedVideo: {
+			if (state.playing || state.queue.length === 0) {
+				return state;
+			}
+			return {
+				...state.queue[0],
+				queue: state.queue.slice(1),
+				playing: true,
+			};
+		}
+		default:
+			return state;
+	}
 };
 
 const VideoAlerts = (props: Props) => {
@@ -35,9 +125,14 @@ const VideoAlerts = (props: Props) => {
 		...defaultConfig,
 		...(props.config || {}),
 	};
-	const [alertVideo, setAlertVideo] = useState<string | null>(null);
-	const [alertText, setAlertText] = useState<JSX.Element | null>(null);
-	const [playing, setPlaying] = useState(false);
+
+	const [state, dispatch] = useReducer(reducer, {
+		alertVideo: null,
+		alertText: null,
+		queue: [],
+		playing: false,
+	});
+
 	useMessageListener(
 		{
 			messageType: VideoAlertsMessageType.ShowAlert,
@@ -48,25 +143,17 @@ const VideoAlerts = (props: Props) => {
 		},
 		(event: MessageEvent) => {
 			console.log(`Received server message event: ${JSON.stringify(event, null, 2)}`);
-			if (playing) {
-				console.log('Video already playing!');
-			} else {
-				const { video, text } = event.message;
-				console.log(`Start video ${video}`);
-				setAlertVideo(video);
-				setAlertText(renderText(text));
-				setPlaying(true);
-			}
+			const { video, text } = event.message;
+			dispatch({
+				type: ActionType.QueueVideo,
+				payload: { video, text },
+			});
 		},
-		[
-			alertVideo,
-			setAlertVideo,
-			playing,
-			setPlaying,
-			alertText,
-			setAlertText,
-		],
+		[dispatch],
 	);
+
+	const { alertVideo, alertText, playing } = state;
+
 	return (
 		<div className="screen">
 			<div className="screenRow">
@@ -78,7 +165,9 @@ const VideoAlerts = (props: Props) => {
 				<div className="screenCell vcenter left">
 					<div className="alertTextCell bottom left">
 						<div className={(playing && alertText) ? 'alertText' : 'alertText hide'}>
-							{alertText}
+							{alertText && alertText.map(({ char, className }, i) => (
+								<div key={i} className={className}>{char}</div>
+							))}
 						</div>
 					</div>
 				</div>
@@ -88,14 +177,22 @@ const VideoAlerts = (props: Props) => {
 			<div className="screenRow">
 				<div className="screenCell bottom left">
 					<div className={playing ? 'videoCell' : 'videoCell hide'}>
-						<ReactPlayer
-							width="100%"
-							height="100%"
-							url={`${assetsUrl}/${alertVideo}`}
-							playing={playing}
-							onEnded={() => setPlaying(false)}
-							volume={0.1}
-						/>
+						{alertVideo && (
+							<ReactPlayer
+								width="100%"
+								height="100%"
+								url={`${assetsUrl}/${alertVideo}`}
+								playing={playing}
+								onEnded={() => {
+									dispatch({ type: ActionType.EndPlayback });
+									setTimeout(
+										() => dispatch({ type: ActionType.PlayQueuedVideo }),
+										1000,
+									);
+								}}
+								volume={0.1}
+							/>
+						)}
 					</div>
 				</div>
 				<div className="screenCell bottom hcenter"></div>

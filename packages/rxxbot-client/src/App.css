@@ -83,6 +83,11 @@
   opacity: 1;
 }
 
+.alertText .regular {
+  display: inline;
+  color: green;
+}
+
 .alertText .highlight {
   display: inline;
   color: lightgreen;
