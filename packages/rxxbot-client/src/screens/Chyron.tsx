@@ -212,18 +212,14 @@ const Chyron = (props: Props) => {
 
 	return (
 		<div className="screen">
-			<div className="screenRow"></div>
-			<div className="screenRow"></div>
-			<div className="screenRow bottom">
-				{crawl && (
-					<div className="chyronCrawl">
-						{crawl.slice(0, chyronWidth)
-							.map(({ char, className }, i) => (
-								<div key={i} className={className}>{char}</div>
-						))}
-					</div>
-				)}
-			</div>
+			{crawl && (
+				<div className="chyronCrawl">
+					{crawl.slice(0, chyronWidth)
+						.map(({ char, className }, i) => (
+							<div key={i} className={className}>{char}</div>
+					))}
+				</div>
+			)}
 		</div>
 	);
 };

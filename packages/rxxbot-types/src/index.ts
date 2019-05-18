@@ -118,6 +118,7 @@ export enum TwitchMessageType {
 	Cheer = 'Twitch.cheer',
 	CommunitySub = 'Twitch.communitySub',
 	EmoteOnly = 'Twitch.emoteOnly',
+	Follow = 'Twitch.follow',
 	FollowersOnly = 'Twitch.followersOnly',
 	Host = 'Twitch.host',
 	Hosted = 'Twitch.hosted',
@@ -233,6 +234,11 @@ export interface TwitchMessageEventEmoteOnly extends MessageEvent {
 	message: TwitchMessageEventMessageWithChannel & {
 		enabled: boolean;
 	};
+}
+
+export interface TwitchMessageEventFollow extends MessageEvent {
+	messageType: TwitchMessageType.Follow;
+	message: TwitchMessageEventMessageWithUser;
 }
 
 export interface TwitchMessageEventFollowersOnlyEnabled extends MessageEvent {
@@ -415,6 +421,7 @@ export type TwitchMessageEvent = TwitchMessageEventBitsBadgeUpgrade
 	| TwitchMessageEventCheer
 	| TwitchMessageEventCommunitySub
 	| TwitchMessageEventEmoteOnly
+	| TwitchMessageEventFollow
 	| TwitchMessageEventFollowersOnly
 	| TwitchMessageEventHost
 	| TwitchMessageEventHosted
@@ -441,6 +448,7 @@ export interface TwitchAlertBaseConfig {
 	crawlTemplates?: string[];
 	videos: (string | {
 		video: string;
+		credit?: string;
 		captionTemplates?: string[] | null;
 		crawlTemplates?: string[] | null;
 	})[];
@@ -481,6 +489,7 @@ export interface VideoAlertsEventShowAlert extends MessageEvent {
 		screenId: string;
 		video: string;
 		text?: string;
+		credit?: string;
 	};
 }
 

@@ -19,17 +19,19 @@ interface Props {
 	config?: Partial<VideoAlertsConfig>;
 }
 
-interface AlertTextChar {
-	char: string;
+interface AlertText {
+	text: string;
 	className: string;
 }
 
 interface State {
 	alertVideo: string | null;
-	alertText: AlertTextChar[] | null;
+	alertText: AlertText[] | null;
+	alertCredit: string | null;
 	queue: {
 		alertVideo: string;
-		alertText: AlertTextChar[] | null;
+		alertText: AlertText[] | null;
+		alertCredit: string | null;
 	}[];
 	playing: boolean;
 }
@@ -44,7 +46,8 @@ interface QueueVideoAction {
 	type: ActionType.QueueVideo;
 	payload: {
 		video: string;
-		text: string;
+		text?: string;
+		credit?: string;
 	};
 }
 
@@ -58,20 +61,17 @@ interface PlayQueuedVideoAction {
 
 type Action = QueueVideoAction | EndPlaybackAction | PlayQueuedVideoAction;
 
-const renderText = (text: string) => {
+const renderText = (text: string | undefined) => {
 	if (!text) {
 		return null;
 	}
-	const rendered: AlertTextChar[] = [];
+	const rendered: AlertText[] = [];
 	const words = text.split(' ');
 	words.forEach((word) => {
-		Array.from(word).forEach((char) => {
-			rendered.push({
-				char,
-				className: word[0] === '@' ? 'highlight' : 'regular',
-			});
+		rendered.push({
+			text: `${word} `,
+			className: word[0] === '@' ? 'highlight' : 'regular',
 		});
-		rendered.push({ char: ' ', className: 'regular' });
 	});
 	return rendered;
 };
@@ -79,7 +79,7 @@ const renderText = (text: string) => {
 const reducer = (state: State, action: Action): State => {
 	switch (action.type) {
 		case ActionType.QueueVideo: {
-			const { video, text } = action.payload;
+			const { video, text, credit } = action.payload;
 			if (state.playing || state.queue.length > 0) {
 				return {
 					...state,
@@ -88,6 +88,7 @@ const reducer = (state: State, action: Action): State => {
 						{
 							alertVideo: video,
 							alertText: renderText(text),
+							alertCredit: credit || null,
 						},
 					],
 				};
@@ -96,6 +97,7 @@ const reducer = (state: State, action: Action): State => {
 				...state,
 				alertVideo: video,
 				alertText: renderText(text),
+				alertCredit: credit || null,
 				playing: true,
 			};
 		}
@@ -129,6 +131,7 @@ const VideoAlerts = (props: Props) => {
 	const [state, dispatch] = useReducer(reducer, {
 		alertVideo: null,
 		alertText: null,
+		alertCredit: null,
 		queue: [],
 		playing: false,
 	});
@@ -143,60 +146,55 @@ const VideoAlerts = (props: Props) => {
 		},
 		(event: MessageEvent) => {
 			console.log(`Received server message event: ${JSON.stringify(event, null, 2)}`);
-			const { video, text } = event.message;
+			const { video, text, credit } = event.message;
 			dispatch({
 				type: ActionType.QueueVideo,
-				payload: { video, text },
+				payload: { video, text, credit },
 			});
 		},
 		[dispatch],
 	);
 
-	const { alertVideo, alertText, playing } = state;
+	const {
+		alertVideo,
+		alertText,
+		alertCredit,
+		playing,
+	} = state;
 
 	return (
 		<div className="screen">
-			<div className="screenRow">
-				<div className="screenCell top left"></div>
-				<div className="screenCell top hcenter"></div>
-				<div className="screenCell top right"></div>
-			</div>
-			<div className="screenRow">
-				<div className="screenCell vcenter left">
-					<div className="alertTextCell bottom left">
-						<div className={(playing && alertText) ? 'alertText' : 'alertText hide'}>
-							{alertText && alertText.map(({ char, className }, i) => (
-								<div key={i} className={className}>{char}</div>
-							))}
-						</div>
+			<div className="videoAlert">
+				{alertText && (
+					<div className={playing ? 'videoAlertText' : 'videoAlertText hide'}>
+						{alertText && alertText.map(({ text, className }, i) => (
+							<div key={i} className={className}>{text}</div>
+						))}
 					</div>
+				)}
+				<div className={playing ? 'videoAlertVideo' : 'videoAlertVideo hide'}>
+					{alertVideo && (
+						<ReactPlayer
+							width="100%"
+							height="100%"
+							url={`${assetsUrl}/${alertVideo}`}
+							playing={playing}
+							onEnded={() => {
+								dispatch({ type: ActionType.EndPlayback });
+								setTimeout(
+									() => dispatch({ type: ActionType.PlayQueuedVideo }),
+									1000,
+								);
+							}}
+							volume={0.1}
+						/>
+					)}
 				</div>
-				<div className="screenCell vcenter hcenter"></div>
-				<div className="screenCell vcenter right"></div>
-			</div>
-			<div className="screenRow">
-				<div className="screenCell bottom left">
-					<div className={playing ? 'videoCell' : 'videoCell hide'}>
-						{alertVideo && (
-							<ReactPlayer
-								width="100%"
-								height="100%"
-								url={`${assetsUrl}/${alertVideo}`}
-								playing={playing}
-								onEnded={() => {
-									dispatch({ type: ActionType.EndPlayback });
-									setTimeout(
-										() => dispatch({ type: ActionType.PlayQueuedVideo }),
-										1000,
-									);
-								}}
-								volume={0.1}
-							/>
-						)}
+				{alertCredit && (
+					<div className={playing ? 'videoAlertCredit' : 'videoAlertCredit hide'}>
+						{alertCredit}
 					</div>
-				</div>
-				<div className="screenCell bottom hcenter"></div>
-				<div className="screenCell bottom right"></div>
+				)}
 			</div>
 		</div>
 	);

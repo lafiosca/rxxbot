@@ -48,12 +48,14 @@ class TwitchAlerts extends AbstractConfigurableModule<TwitchAlertsConfig> {
 				continue;
 			}
 			let video: string | undefined;
+			let credit: string | undefined;
 			let captionTemplate: string | null | undefined;
 			let crawlTemplate: string | null | undefined;
 			if (typeof videoPick === 'string') {
 				video = videoPick;
 			} else {
 				video = videoPick.video;
+				credit = videoPick.credit;
 				if (videoPick.captionTemplates) {
 					captionTemplate = lodash.sample(videoPick.captionTemplates);
 				} else {
@@ -77,6 +79,7 @@ class TwitchAlerts extends AbstractConfigurableModule<TwitchAlertsConfig> {
 				VideoAlertsMessageType.ShowAlert,
 				{
 					video,
+					credit,
 					text,
 					screenId: this.config.videoAlertsScreenId,
 				},
