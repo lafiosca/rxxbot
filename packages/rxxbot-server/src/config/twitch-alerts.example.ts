@@ -89,7 +89,7 @@ const twitchAlertsConfig: Partial<TwitchAlertsConfig> = {
 				},
 				{
 					video: 'follow/kitty-city.mp4',
-					credit: 'Cyriak - Kitty City',
+					credit: 'Cyriak - Welcome to Kitty City',
 					captionTemplates: ['Welcome to kitty city, @{user}!'],
 				},
 			],
