@@ -14,6 +14,15 @@ const defaultConfig: TwitchAlertsConfig = {
 	videoAlertsScreenId: 'VideoAlerts',
 	chyronScreenId: 'Chyron',
 	alerts: [],
+	crawlMessages: [
+		'@rxxbot created by @lafiosca',
+		'Test message #5',
+		'Test message #23',
+		'fnord',
+		'imposition of order = escalation of chaos!',
+		'Hail Eris! All hail Discordia!',
+		'Praise "Bob"!',
+	],
 };
 
 class TwitchAlerts extends AbstractConfigurableModule<TwitchAlertsConfig> {
@@ -104,12 +113,7 @@ class TwitchAlerts extends AbstractConfigurableModule<TwitchAlertsConfig> {
 				{
 					screenId: this.config.chyronScreenId,
 					config: {
-						crawlMessages: [
-							'test message #23',
-							'fnord!',
-							'imposition of order = escalation of chaos',
-							'@rxxbot created by @lafiosca',
-						],
+						crawlMessages: this.config.crawlMessages,
 					},
 				},
 			);

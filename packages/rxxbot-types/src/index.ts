@@ -477,6 +477,7 @@ export interface TwitchAlertsConfig extends ModuleConfig {
 	chyronScreenId: string;
 	channel?: string;
 	alerts: TwitchAlertConfig[];
+	crawlMessages?: string[];
 }
 
 export enum VideoAlertsMessageType {
