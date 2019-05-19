@@ -114,8 +114,12 @@ class Server {
 					message,
 					fromModuleId: moduleSpec.id,
 				}),
-			store: (key: string, value: string) => this.store(moduleSpec.id, key, value),
-			fetch: (key: string) => this.fetch(moduleSpec.id, key),
+			store: <T = any>(key: string, value: T) =>
+				this.store(moduleSpec.id, key, JSON.stringify(value)),
+			fetch: async <T = any>(key: string): Promise<T | null> => {
+				const value = await this.fetch(moduleSpec.id, key);
+				return value && JSON.parse(value);
+			},
 			remove: (key: string) => this.remove(moduleSpec.id, key),
 		};
 		if (moduleSpec.privileged) {

@@ -1,4 +1,8 @@
-import TwitchClient, { AccessToken, PrivilegedUser } from 'twitch';
+import TwitchClient, {
+	AccessToken,
+	PrivilegedUser,
+	HelixUser,
+} from 'twitch';
 import TwitchChatClient from 'twitch-chat-client';
 import TwitchPrivateMessage from 'twitch-chat-client/lib/StandardCommands/PrivateMessage';
 import {
@@ -9,6 +13,10 @@ import {
 } from 'rxxbot-types';
 
 import AbstractConfigurableModule from './AbstractConfigurableModule';
+
+interface UserCache {
+	[name: string]: HelixUser;
+}
 
 const convertEmoteOffsets = (emoteOffsets: TwitchPrivateMessage['emoteOffsets']) =>
 	Array.from(emoteOffsets.entries()).reduce(
@@ -22,6 +30,7 @@ const convertEmoteOffsets = (emoteOffsets: TwitchPrivateMessage['emoteOffsets'])
 class Twitch extends AbstractConfigurableModule<TwitchConfig> {
 	protected twitch: TwitchClient | null = null;
 	protected me: PrivilegedUser | null = null;
+	protected userCache: UserCache = {};
 
 	protected init = async () => {
 		await this.initTwitch();
@@ -71,6 +80,8 @@ class Twitch extends AbstractConfigurableModule<TwitchConfig> {
 
 		this.me = await this.twitch.users.getMe();
 		console.log(`Logged into Twitch as: ${JSON.stringify(this.me, null, 2)}`);
+
+		await this.pollFollowers();
 	}
 
 	protected initTwitchChat = async () => {
@@ -386,6 +397,56 @@ class Twitch extends AbstractConfigurableModule<TwitchConfig> {
 		} catch (error) {
 			throw new Error(`Failed during Twitch IRC setup: ${error}`);
 		}
+	}
+
+	protected getUser = async (name: string) => {
+		if (!this.userCache[name]) {
+			const user = await this.twitch!.helix.users.getUserByName(name);
+			if (user === null) {
+				return null;
+			}
+			this.userCache[name] = user;
+		}
+		return this.userCache[name];
+	}
+
+	protected pollFollowers = async () => {
+		for (let i = 0; i < this.config.channels.length; i += 1) {
+			const channel = this.config.channels[i];
+			const channelUser = await this.getUser(channel);
+			if (!channelUser) {
+				continue;
+			}
+			const lastFollowKey = `lastFollow.${channel}`;
+			const lastFollow = await this.api!.fetch<string>(lastFollowKey);
+			const request = this.twitch!.helix.users.getFollows({ followedUser: channelUser });
+			const follows = await request.getNext();
+			if (follows.length === 0) {
+				continue;
+			}
+			const latestFollow = follows[0].followDate.toISOString();
+			if (lastFollow) {
+				const newFollowers: string[] = [];
+				const lastFollowDate = new Date(lastFollow);
+				for (let j = 0; j < follows.length && follows[j].followDate > lastFollowDate; j += 1) {
+					const follower = await follows[j].getUser();
+					if (follower) {
+						newFollowers.unshift(follower.name);
+					}
+				}
+				newFollowers.forEach((user) => {
+					this.sendMessage(
+						TwitchMessageType.Follow,
+						{ channel, user },
+					);
+				});
+			}
+			if (latestFollow !== lastFollow) {
+				console.log(`Store ${lastFollowKey}: ${latestFollow}`);
+				this.api!.store<string>(lastFollowKey, latestFollow);
+			}
+		}
+		setTimeout(this.pollFollowers, 60000);
 	}
 
 	protected sendMessage = <T extends TwitchMessageType>(

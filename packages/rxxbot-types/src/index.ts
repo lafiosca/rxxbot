@@ -86,8 +86,8 @@ export type ServerEvent = InitCompleteEvent | MessageEvent | HeartbeatEvent;
 
 export interface ServerApi {
 	sendMessage: (messageType: string, message: MessageEventMessage) => Promise<void>;
-	store: (key: string, value: string) => Promise<void>;
-	fetch: (key: string) => Promise<string | null>;
+	store: <T = any>(key: string, value: T) => Promise<void>;
+	fetch: <T = any>(key: string) => Promise<T | null>;
 	remove: (key: string) => Promise<void>;
 	heartbeat?: () => Promise<void>;
 	sendMessageFromScreen?: (
@@ -238,7 +238,7 @@ export interface TwitchMessageEventEmoteOnly extends MessageEvent {
 
 export interface TwitchMessageEventFollow extends MessageEvent {
 	messageType: TwitchMessageType.Follow;
-	message: TwitchMessageEventMessageWithUser;
+	message: TwitchMessageEventMessageWithChannelUser;
 }
 
 export interface TwitchMessageEventFollowersOnlyEnabled extends MessageEvent {
