@@ -3,6 +3,7 @@ import ReactPlayer from 'react-player';
 import { MessageEvent, VideoAlertsMessageType } from 'rxxbot-types';
 import { useMessageListener } from '../hooks/useMessageListener';
 import '../App.css';
+import { renderC64Words } from '../services/c64colors';
 
 const assetsUrl = `${process.env.PUBLIC_URL}/assets`;
 
@@ -61,20 +62,8 @@ interface PlayQueuedVideoAction {
 
 type Action = QueueVideoAction | EndPlaybackAction | PlayQueuedVideoAction;
 
-const renderText = (text: string | undefined) => {
-	if (!text) {
-		return null;
-	}
-	const rendered: AlertText[] = [];
-	const words = text.split(' ');
-	words.forEach((word) => {
-		rendered.push({
-			text: `${word} `,
-			className: word[0] === '@' ? 'highlight' : 'regular',
-		});
-	});
-	return rendered;
-};
+const renderText = (text: string | undefined) =>
+	text ? renderC64Words(text) : null;
 
 const reducer = (state: State, action: Action): State => {
 	switch (action.type) {

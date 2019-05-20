@@ -455,11 +455,11 @@ export interface TwitchAlertBaseConfig {
 }
 
 export interface TwitchAlertStaticConfig extends TwitchAlertBaseConfig {
-	type: TwitchMessageType;
+	type: TwitchMessageType | TwitchMessageType[];
 }
 
 export interface TwitchAlertCallbackConfig {
-	type: TwitchMessageType;
+	type: TwitchMessageType | TwitchMessageType[];
 	callback: (message: MessageEventMessage) => TwitchAlertBaseConfig | null;
 }
 

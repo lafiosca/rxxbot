@@ -5,6 +5,7 @@ import { useMessageListener } from '../hooks/useMessageListener';
 import { useInterval } from '../hooks/useInterval';
 import { getMessageSender } from '../services/socketIo';
 import '../App.css';
+import { renderC64Chars } from '../services/c64colors';
 
 export interface ChyronScreenConfig {
 	screenId: string;
@@ -32,7 +33,7 @@ interface Props {
 interface State {
 	config: ChyronConfig;
 	crawl: {
-		char: string;
+		text: string;
 		className: string;
 	}[];
 	lastMessage: string | null;
@@ -64,29 +65,13 @@ interface QueueCrawlMessageAction {
 
 type Action = SetConfigAction | UpdateCrawlAction | QueueCrawlMessageAction;
 
-const renderCrawlMessage = (message: string) => {
-	const crawl: State['crawl'] = [];
-	const words = message.split(' ');
-	words.forEach((word) => {
-		Array.from(word).forEach((char) => {
-			crawl.push({
-				char,
-				className: word[0] === '@' ? 'highlight' : 'regular',
-			});
-		});
-		crawl.push({ char: ' ', className: 'regular' });
-	});
-	crawl.push({ char: '*', className: 'separator' });
-	crawl.push({ char: '*', className: 'separator' });
-	crawl.push({ char: '*', className: 'separator' });
-	crawl.push({ char: ' ', className: 'regular' });
-	return crawl;
-};
+const renderCrawlMessage = (message: string) =>
+	renderC64Chars(`${message} %c***%r `);
 
 const initializeCrawl = () => {
 	const crawl: State['crawl'] = [];
 	for (let i = 0; i < chyronWidth; i += 1) {
-		crawl.push({ char: ' ', className: 'regular' });
+		crawl.push({ text: ' ', className: 'regular' });
 	}
 	return crawl;
 };
@@ -215,8 +200,8 @@ const Chyron = (props: Props) => {
 			{crawl && (
 				<div className="chyronCrawl">
 					{crawl.slice(0, chyronWidth)
-						.map(({ char, className }, i) => (
-							<div key={i} className={className}>{char}</div>
+						.map(({ text, className }, i) => (
+							<div key={i} className={className}>{text}</div>
 					))}
 				</div>
 			)}

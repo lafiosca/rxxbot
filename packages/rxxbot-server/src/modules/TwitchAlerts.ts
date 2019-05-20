@@ -40,22 +40,32 @@ class TwitchAlerts extends AbstractConfigurableModule<TwitchAlertsConfig> {
 		const { alerts, channel } = this.config;
 		for (let i = 0; i < alerts.length; i += 1) {
 			const alert = alerts[i];
+
 			if (channel && message.channel && `#${channel}` !== message.channel) {
 				continue;
 			}
-			if (messageType !== alert.type) {
+
+			if (lodash.isArray(alert.type)) {
+				if (!lodash.includes(alert.type, messageType)) {
+					continue;
+				}
+			} else if (messageType !== alert.type) {
 				continue;
 			}
+
 			const alertConfig = isTwitchAlertCallbackConfig(alert)
 				? alert.callback(message)
 				: alert;
+
 			if (!alertConfig) {
 				continue;
 			}
+
 			const videoPick = lodash.sample(alertConfig.videos);
 			if (!videoPick) {
 				continue;
 			}
+
 			let video: string | undefined;
 			let credit: string | undefined;
 			let captionTemplate: string | null | undefined;

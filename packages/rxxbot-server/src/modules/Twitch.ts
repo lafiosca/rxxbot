@@ -5,6 +5,7 @@ import TwitchClient, {
 } from 'twitch';
 import TwitchChatClient from 'twitch-chat-client';
 import TwitchPrivateMessage from 'twitch-chat-client/lib/StandardCommands/PrivateMessage';
+import lodash from 'lodash';
 import {
 	TwitchConfig,
 	TwitchMessageType,
@@ -81,7 +82,7 @@ class Twitch extends AbstractConfigurableModule<TwitchConfig> {
 		this.me = await this.twitch.users.getMe();
 		console.log(`Logged into Twitch as: ${JSON.stringify(this.me, null, 2)}`);
 
-		await this.pollFollowers();
+		await this.pollFollowersAndHosts();
 	}
 
 	protected initTwitchChat = async () => {
@@ -410,14 +411,49 @@ class Twitch extends AbstractConfigurableModule<TwitchConfig> {
 		return this.userCache[name];
 	}
 
-	protected pollFollowers = async () => {
+	protected getHostIdsForChannelId = async (id: string): Promise<string[]> => {
+		const response = await this.twitch!.callAPI({
+			url: `channels/${id}/hosts?include_logins=1`,
+		});
+		if (!response || !response.hosts || !lodash.isArray(response.hosts)) {
+			return [];
+		}
+		return response.hosts.map((result: any) => result && result.host_id);
+	}
+
+	protected pollFollowersAndHosts = async () => {
 		for (let i = 0; i < this.config.channels.length; i += 1) {
-			const channel = this.config.channels[i];
-			const channelUser = await this.getUser(channel);
+			const channelName = this.config.channels[i];
+			const channelUser = await this.getUser(channelName);
 			if (!channelUser) {
 				continue;
 			}
-			const lastFollowKey = `lastFollow.${channel}`;
+
+			const latestHostIds = await this.getHostIdsForChannelId(channelUser.id);
+			const lastHostIdsKey = `lastHostIds.${channelName}`;
+			const lastHostIds = await this.api!.fetch<string[]>(lastHostIdsKey);
+			if (lastHostIds) {
+				for (let j = 0; j < latestHostIds.length; j += 1) {
+					const hostId = latestHostIds[j];
+					if (!lodash.includes(lastHostIds, hostId)) {
+						const host = await this.twitch!.helix.users.getUserById(hostId);
+						if (host) {
+							this.sendMessage(
+								TwitchMessageType.Hosted,
+								{
+									channel: `#${channelName}`,
+									byChannel: host.displayName,
+									auto: false,
+								},
+							);
+						}
+					}
+				}
+			}
+			console.log(`Store ${lastHostIdsKey}: ${JSON.stringify(latestHostIds)}`);
+			this.api!.store<string[]>(lastHostIdsKey, latestHostIds);
+
+			const lastFollowKey = `lastFollow.${channelName}`;
 			const lastFollow = await this.api!.fetch<string>(lastFollowKey);
 			const request = this.twitch!.helix.users.getFollows({ followedUser: channelUser });
 			const follows = await request.getNext();
@@ -437,7 +473,10 @@ class Twitch extends AbstractConfigurableModule<TwitchConfig> {
 				newFollowers.forEach((user) => {
 					this.sendMessage(
 						TwitchMessageType.Follow,
-						{ channel, user },
+						{
+							user,
+							channel: `#${channelName}`,
+						},
 					);
 				});
 			}
@@ -446,7 +485,7 @@ class Twitch extends AbstractConfigurableModule<TwitchConfig> {
 				this.api!.store<string>(lastFollowKey, latestFollow);
 			}
 		}
-		setTimeout(this.pollFollowers, 60000);
+		setTimeout(this.pollFollowersAndHosts, 60000);
 	}
 
 	protected sendMessage = <T extends TwitchMessageType>(
