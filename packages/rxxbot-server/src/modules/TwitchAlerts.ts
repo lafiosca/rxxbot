@@ -68,6 +68,7 @@ class TwitchAlerts extends AbstractConfigurableModule<TwitchAlertsConfig> {
 			}
 
 			let video: string | undefined;
+			let volume: number | undefined;
 			let credit: string | undefined;
 			let captionTemplate: string | null | undefined;
 			let crawlTemplate: string | null | undefined;
@@ -75,6 +76,7 @@ class TwitchAlerts extends AbstractConfigurableModule<TwitchAlertsConfig> {
 				video = videoPick;
 			} else {
 				video = videoPick.video;
+				volume = videoPick.volume;
 				credit = videoPick.credit;
 				if (videoPick.captionTemplates) {
 					captionTemplate = lodash.sample(videoPick.captionTemplates);
@@ -99,6 +101,7 @@ class TwitchAlerts extends AbstractConfigurableModule<TwitchAlertsConfig> {
 				VideoAlertsMessageType.ShowAlert,
 				{
 					video,
+					volume,
 					credit,
 					text,
 					screenId: this.config.videoAlertsScreenId,

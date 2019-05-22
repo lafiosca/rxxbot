@@ -16,6 +16,8 @@ const defaultConfig = {
 	screenId: 'VideoAlerts',
 };
 
+const defaultVolume = 0.2;
+
 interface Props {
 	config?: Partial<VideoAlertsConfig>;
 }
@@ -27,10 +29,12 @@ interface AlertText {
 
 interface State {
 	alertVideo: string | null;
+	alertVolume: number | null;
 	alertText: AlertText[] | null;
 	alertCredit: string | null;
 	queue: {
 		alertVideo: string;
+		alertVolume: number | null;
 		alertText: AlertText[] | null;
 		alertCredit: string | null;
 	}[];
@@ -47,6 +51,7 @@ interface QueueVideoAction {
 	type: ActionType.QueueVideo;
 	payload: {
 		video: string;
+		volume?: number;
 		text?: string;
 		credit?: string;
 	};
@@ -68,25 +73,30 @@ const renderText = (text: string | undefined) =>
 const reducer = (state: State, action: Action): State => {
 	switch (action.type) {
 		case ActionType.QueueVideo: {
-			const { video, text, credit } = action.payload;
+			const {
+				video,
+				volume,
+				text,
+				credit,
+			} = action.payload;
+			const newVideo = {
+				alertVideo: video,
+				alertVolume: volume || null,
+				alertText: renderText(text),
+				alertCredit: credit || null,
+			};
 			if (state.playing || state.queue.length > 0) {
 				return {
 					...state,
 					queue: [
 						...state.queue,
-						{
-							alertVideo: video,
-							alertText: renderText(text),
-							alertCredit: credit || null,
-						},
+						newVideo,
 					],
 				};
 			}
 			return {
 				...state,
-				alertVideo: video,
-				alertText: renderText(text),
-				alertCredit: credit || null,
+				...newVideo,
 				playing: true,
 			};
 		}
@@ -119,6 +129,7 @@ const VideoAlerts = (props: Props) => {
 
 	const [state, dispatch] = useReducer(reducer, {
 		alertVideo: null,
+		alertVolume: null,
 		alertText: null,
 		alertCredit: null,
 		queue: [],
@@ -135,10 +146,20 @@ const VideoAlerts = (props: Props) => {
 		},
 		(event: MessageEvent) => {
 			console.log(`Received server message event: ${JSON.stringify(event, null, 2)}`);
-			const { video, text, credit } = event.message;
+			const {
+				video,
+				volume,
+				text,
+				credit,
+			} = event.message;
 			dispatch({
 				type: ActionType.QueueVideo,
-				payload: { video, text, credit },
+				payload: {
+					video,
+					volume,
+					text,
+					credit,
+				},
 			});
 		},
 		[dispatch],
@@ -146,6 +167,7 @@ const VideoAlerts = (props: Props) => {
 
 	const {
 		alertVideo,
+		alertVolume,
 		alertText,
 		alertCredit,
 		playing,
@@ -175,7 +197,7 @@ const VideoAlerts = (props: Props) => {
 									1000,
 								);
 							}}
-							volume={0.1}
+							volume={alertVolume || defaultVolume}
 						/>
 					)}
 				</div>

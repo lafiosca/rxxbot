@@ -398,6 +398,7 @@ export interface TwitchAlertBaseConfig {
 	crawlTemplates?: string[];
 	videos: (string | {
 		video: string;
+		volume?: number;
 		credit?: string;
 		captionTemplates?: string[] | null;
 		crawlTemplates?: string[] | null;
@@ -439,6 +440,7 @@ export interface VideoAlertsEventShowAlert extends MessageEvent {
 	message: {
 		screenId: string;
 		video: string;
+		volume?: number;
 		text?: string;
 		credit?: string;
 	};
