@@ -267,6 +267,7 @@ class Twitch extends AbstractConfigurableModule<TwitchConfig> {
 						plan: subInfo.plan,
 						planName: subInfo.planName,
 						months: subInfo.months,
+						...(subInfo.streak ? { streak: subInfo.streak } : {}),
 						...(subInfo.message
 							? {
 								message: subInfo.message,

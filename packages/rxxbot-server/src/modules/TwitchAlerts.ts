@@ -4,6 +4,7 @@ import {
 	isTwitchAlertCallbackConfig,
 	MessageEvent,
 	ChyronMessageType,
+	TwitchMessageType,
 } from 'rxxbot-types';
 import lodash from 'lodash';
 
@@ -54,7 +55,7 @@ class TwitchAlerts extends AbstractConfigurableModule<TwitchAlertsConfig> {
 			}
 
 			const alertConfig = isTwitchAlertCallbackConfig(alert)
-				? alert.callback(message)
+				? alert.callback(message, messageType as TwitchMessageType)
 				: alert;
 
 			if (!alertConfig) {

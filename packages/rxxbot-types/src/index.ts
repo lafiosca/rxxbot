@@ -174,21 +174,15 @@ export interface TwitchMessageEventCommunitySubMessageBase
 	plan: string;
 }
 
-export interface TwitchMessageEventSubResubMessageBase
-	extends TwitchMessageEventMessageWithChannelUser {
+export interface TwitchMessageEventSubMessage extends
+	TwitchMessageEventMessageWithChannelUser,
+	Partial<TwitchMessageEventMessageWithMessage> {
 	displayName: string;
 	isPrime: boolean;
 	months: number;
 	plan: string;
 	planName: string;
-}
-
-export interface TwitchMessageEventSubMessageBase extends TwitchMessageEventSubResubMessageBase {
 	streak?: number;
-}
-
-export interface TwitchMessageEventResubMessageBase extends TwitchMessageEventSubResubMessageBase {
-	months: number;
 }
 
 export interface TwitchMessageEventBitsBadgeUpgrade extends MessageEvent {
@@ -216,18 +210,10 @@ export interface TwitchMessageEventCheer extends MessageEvent {
 	};
 }
 
-export interface TwitchMessageEventCommunitySubAnonymous extends MessageEvent {
+export interface TwitchMessageEventCommunitySub extends MessageEvent {
 	messageType: TwitchMessageType.CommunitySub;
-	message: TwitchMessageEventCommunitySubMessageBase;
+	message: TwitchMessageEventCommunitySubMessageBase & Partial<TwitchMessageEventMessageWithGifter>;
 }
-
-export interface TwitchMessageEventCommunitySubNamed extends MessageEvent {
-	messageType: TwitchMessageType.CommunitySub;
-	message: TwitchMessageEventCommunitySubMessageBase & TwitchMessageEventMessageWithGifter;
-}
-
-export type TwitchMessageEventCommunitySub = TwitchMessageEventCommunitySubAnonymous
-	| TwitchMessageEventCommunitySubNamed;
 
 export interface TwitchMessageEventEmoteOnly extends MessageEvent {
 	messageType: TwitchMessageType.EmoteOnly;
@@ -313,18 +299,10 @@ export interface TwitchMessageEventRaid extends MessageEvent {
 	};
 }
 
-export interface TwitchMessageEventResubWithoutMessage extends MessageEvent {
+export interface TwitchMessageEventResub extends MessageEvent {
 	messageType: TwitchMessageType.Resub;
-	message: TwitchMessageEventResubMessageBase;
+	message: TwitchMessageEventSubMessage;
 }
-
-export interface TwitchMessageEventResubWithMessage extends MessageEvent {
-	messageType: TwitchMessageType.Resub;
-	message: TwitchMessageEventResubMessageBase & TwitchMessageEventMessageWithMessage;
-}
-
-export type TwitchMessageEventResub = TwitchMessageEventResubWithoutMessage
-	| TwitchMessageEventResubWithMessage;
 
 export interface TwitchMessageEventRitual extends MessageEvent {
 	messageType: TwitchMessageType.Ritual;
@@ -350,45 +328,17 @@ export interface TwitchMessageEventSlowDisabled extends MessageEvent {
 
 export type TwitchMessageEventSlow = TwitchMessageEventSlowEnabled | TwitchMessageEventSlowDisabled;
 
-export interface TwitchMessageEventSubWithoutMessage extends MessageEvent {
+export interface TwitchMessageEventSub extends MessageEvent {
 	messageType: TwitchMessageType.Sub;
-	message: TwitchMessageEventSubMessageBase;
+	message: TwitchMessageEventSubMessage;
 }
 
-export interface TwitchMessageEventSubWithMessage extends MessageEvent {
-	messageType: TwitchMessageType.Sub;
-	message: TwitchMessageEventSubMessageBase & TwitchMessageEventMessageWithMessage;
-}
-
-export type TwitchMessageEventSub = TwitchMessageEventSubWithoutMessage
-	| TwitchMessageEventSubWithMessage;
-
-export interface TwitchMessageEventSubGiftAnonymousWithoutMessage extends MessageEvent {
+export interface TwitchMessageEventSubGift extends MessageEvent {
 	messageType: TwitchMessageType.SubGift;
-	message: TwitchMessageEventSubMessageBase;
+	message: TwitchMessageEventSubMessage
+		& Partial<TwitchMessageEventMessageWithGifter>
+		& Partial<TwitchMessageEventMessageWithMessage>;
 }
-
-export interface TwitchMessageEventSubGiftAnonymousWithMessage extends MessageEvent {
-	messageType: TwitchMessageType.SubGift;
-	message: TwitchMessageEventSubMessageBase & TwitchMessageEventMessageWithMessage;
-}
-
-export interface TwitchMessageEventSubGiftNamedWithoutMessage extends MessageEvent {
-	messageType: TwitchMessageType.SubGift;
-	message: TwitchMessageEventSubMessageBase & TwitchMessageEventMessageWithGifter;
-}
-
-export interface TwitchMessageEventSubGiftNamedWithMessage extends MessageEvent {
-	messageType: TwitchMessageType.SubGift;
-	message: TwitchMessageEventSubMessageBase
-		& TwitchMessageEventMessageWithGifter
-		& TwitchMessageEventMessageWithMessage;
-}
-
-export type TwitchMessageEventSubGift = TwitchMessageEventSubGiftAnonymousWithoutMessage
-	| TwitchMessageEventSubGiftAnonymousWithMessage
-	| TwitchMessageEventSubGiftNamedWithoutMessage
-	| TwitchMessageEventSubGiftNamedWithMessage;
 
 export interface TwitchMessageEventSubsOnly extends MessageEvent {
 	messageType: TwitchMessageType.SubsOnly;
@@ -460,7 +410,7 @@ export interface TwitchAlertStaticConfig extends TwitchAlertBaseConfig {
 
 export interface TwitchAlertCallbackConfig {
 	type: TwitchMessageType | TwitchMessageType[];
-	callback: (message: MessageEventMessage) => TwitchAlertBaseConfig | null;
+	callback: (message: MessageEventMessage, type: TwitchMessageType) => TwitchAlertBaseConfig | null;
 }
 
 export type TwitchAlertConfig = TwitchAlertStaticConfig | TwitchAlertCallbackConfig;
