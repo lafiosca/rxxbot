@@ -198,7 +198,7 @@ const Chyron = (props: Props) => {
 	return (
 		<div className="screen">
 			{crawl && (
-				<div className="chyronCrawl">
+				<div className="chyronCrawl crt">
 					{crawl.slice(0, chyronWidth)
 						.map(({ text, className }, i) => (
 							<div key={i} className={className}>{text}</div>

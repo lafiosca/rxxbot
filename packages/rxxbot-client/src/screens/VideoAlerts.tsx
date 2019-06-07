@@ -177,7 +177,7 @@ const VideoAlerts = (props: Props) => {
 		<div className="screen">
 			<div className="videoAlert">
 				{alertText && (
-					<div className={playing ? 'videoAlertText' : 'videoAlertText hide'}>
+					<div className={playing ? 'videoAlertText crt' : 'videoAlertText hide crt'}>
 						{alertText && alertText.map(({ text, className }, i) => (
 							<div key={i} className={className}>{text}</div>
 						))}
@@ -202,7 +202,7 @@ const VideoAlerts = (props: Props) => {
 					)}
 				</div>
 				{alertCredit && (
-					<div className={playing ? 'videoAlertCredit' : 'videoAlertCredit hide'}>
+					<div className={playing ? 'videoAlertCredit crt' : 'videoAlertCredit crt hide'}>
 						{alertCredit}
 					</div>
 				)}
