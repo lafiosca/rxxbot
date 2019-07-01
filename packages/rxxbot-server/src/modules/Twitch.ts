@@ -423,68 +423,72 @@ class Twitch extends AbstractConfigurableModule<TwitchConfig> {
 	}
 
 	protected pollFollowersAndHosts = async () => {
-		for (let i = 0; i < this.config.channels.length; i += 1) {
-			const channelName = this.config.channels[i];
-			const channelUser = await this.getUser(channelName);
-			if (!channelUser) {
-				continue;
-			}
+		try {
+			for (let i = 0; i < this.config.channels.length; i += 1) {
+				const channelName = this.config.channels[i];
+				const channelUser = await this.getUser(channelName);
+				if (!channelUser) {
+					continue;
+				}
 
-			const latestHostIds = await this.getHostIdsForChannelId(channelUser.id);
-			const lastHostIdsKey = `lastHostIds.${channelName}`;
-			const lastHostIds = await this.api!.fetch<string[]>(lastHostIdsKey);
-			if (lastHostIds) {
-				for (let j = 0; j < latestHostIds.length; j += 1) {
-					const hostId = latestHostIds[j];
-					if (!lodash.includes(lastHostIds, hostId)) {
-						const host = await this.twitch!.helix.users.getUserById(hostId);
-						if (host) {
-							this.sendMessage(
-								TwitchMessageType.Hosted,
-								{
-									channel: `#${channelName}`,
-									byChannel: host.displayName,
-									auto: false,
-								},
-							);
+				const latestHostIds = await this.getHostIdsForChannelId(channelUser.id);
+				const lastHostIdsKey = `lastHostIds.${channelName}`;
+				const lastHostIds = await this.api!.fetch<string[]>(lastHostIdsKey);
+				if (lastHostIds) {
+					for (let j = 0; j < latestHostIds.length; j += 1) {
+						const hostId = latestHostIds[j];
+						if (!lodash.includes(lastHostIds, hostId)) {
+							const host = await this.twitch!.helix.users.getUserById(hostId);
+							if (host) {
+								this.sendMessage(
+									TwitchMessageType.Hosted,
+									{
+										channel: `#${channelName}`,
+										byChannel: host.displayName,
+										auto: false,
+									},
+								);
+							}
 						}
 					}
 				}
-			}
-			console.log(`Store ${lastHostIdsKey}: ${JSON.stringify(latestHostIds)}`);
-			this.api!.store<string[]>(lastHostIdsKey, latestHostIds);
+				console.log(`Store ${lastHostIdsKey}: ${JSON.stringify(latestHostIds)}`);
+				this.api!.store<string[]>(lastHostIdsKey, latestHostIds);
 
-			const lastFollowKey = `lastFollow.${channelName}`;
-			const lastFollow = await this.api!.fetch<string>(lastFollowKey);
-			const request = this.twitch!.helix.users.getFollows({ followedUser: channelUser });
-			const follows = await request.getNext();
-			if (follows.length === 0) {
-				continue;
-			}
-			const latestFollow = follows[0].followDate.toISOString();
-			if (lastFollow) {
-				const newFollowers: string[] = [];
-				const lastFollowDate = new Date(lastFollow);
-				for (let j = 0; j < follows.length && follows[j].followDate > lastFollowDate; j += 1) {
-					const follower = await follows[j].getUser();
-					if (follower) {
-						newFollowers.unshift(follower.name);
-					}
+				const lastFollowKey = `lastFollow.${channelName}`;
+				const lastFollow = await this.api!.fetch<string>(lastFollowKey);
+				const request = this.twitch!.helix.users.getFollows({ followedUser: channelUser });
+				const follows = await request.getNext();
+				if (follows.length === 0) {
+					continue;
 				}
-				newFollowers.forEach((user) => {
-					this.sendMessage(
-						TwitchMessageType.Follow,
-						{
-							user,
-							channel: `#${channelName}`,
-						},
-					);
-				});
+				const latestFollow = follows[0].followDate.toISOString();
+				if (lastFollow) {
+					const newFollowers: string[] = [];
+					const lastFollowDate = new Date(lastFollow);
+					for (let j = 0; j < follows.length && follows[j].followDate > lastFollowDate; j += 1) {
+						const follower = await follows[j].getUser();
+						if (follower) {
+							newFollowers.unshift(follower.name);
+						}
+					}
+					newFollowers.forEach((user) => {
+						this.sendMessage(
+							TwitchMessageType.Follow,
+							{
+								user,
+								channel: `#${channelName}`,
+							},
+						);
+					});
+				}
+				if (latestFollow !== lastFollow) {
+					console.log(`Store ${lastFollowKey}: ${latestFollow}`);
+					this.api!.store<string>(lastFollowKey, latestFollow);
+				}
 			}
-			if (latestFollow !== lastFollow) {
-				console.log(`Store ${lastFollowKey}: ${latestFollow}`);
-				this.api!.store<string>(lastFollowKey, latestFollow);
-			}
+		} catch (error) {
+			console.error(`Failed to poll followers and hosts: ${error}`);
 		}
 		setTimeout(this.pollFollowersAndHosts, 60000);
 	}
