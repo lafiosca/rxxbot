@@ -14,3 +14,7 @@ Documentation does not exist currently. Hopefully in the future.
 * `lerna run build --scope rxxbot-types --scope rxxbot-server`
 * Establish config/assets
 * `npx lerna run start --stream`
+
+## Chrome autoplay
+
+For videos to automatically play with sound in Chrome, follow these directions and add `localhost` to your allowed host list: https://int.pixilab.se/docs/blocks/autoplay
